@@ -1,12 +1,29 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
+import 'react-widgets/styles.css';
 import App from './App';
+import { Router } from 'react-router-dom';
 import reportWebVitals from './reportWebVitals';
+import { createBrowserHistory } from 'history';
+
+export const history = createBrowserHistory();
+
+const backup = console.error;
+
+console.error = function filterWarnings(...msg) {
+  const supressedWarnings = ['findDOMNode'];
+
+  if (!supressedWarnings.some(entry => msg.includes(entry))) {
+    backup.apply(console, arguments);
+  }
+};
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <Router history={history}>
+      <App />
+    </Router>
   </React.StrictMode>,
   document.getElementById('root')
 );

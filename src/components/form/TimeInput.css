@@ -1,0 +1,23 @@
+.react-time-picker input {
+    padding: 0 !important;
+    border: 0px !important;
+}
+
+.react-time-picker select {
+    width: auto !important;
+    display: inline !important;
+    border: 0 !important;
+    padding: 0 !important;
+}
+
+.react-time-picker__wrapper {
+    border: 1px solid rgba(34,36,38,.15);
+    color: rgba(0,0,0,.87);
+    border-radius: .28571429rem;
+    padding: .67857143em 1em;
+    height: 40px;
+}
+
+.react-time-picker__button {
+    padding: 0;
+}
