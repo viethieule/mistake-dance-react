@@ -8,25 +8,35 @@ export default class CalendarControls extends Component {
         return moment(date).format('DD/MM')
     }
 
+    navigatePreviousWeek = () => {
+        return this.props.handleOnWeekNavigating(false);
+    }
+
+    navigateNextWeek = () => {
+        return this.props.handleOnWeekNavigating(true);
+    }
+
     render() {
         const {
             weekdays,
-            toggleCreateModal
+            toggleCreateModal,
+            singleDayMode,
+            toggleViewMode
         } = this.props;
         return (
             <Grid>
                 <div className="sixteen column row">
                     <div className="eight wide column">
-                        <button>&lt;</button>
+                        <button onClick={this.navigatePreviousWeek}>&lt;</button>
                         {weekdays.map(weekday => (
                             <button key={weekday.date.getDate()} className={styles.Circle}>{weekday.date.getDate()}</button>
                         ))}
-                        <button>&gt;</button>
+                        <button onClick={this.navigateNextWeek}>&gt;</button>
                     </div>
                     <div className="two wide column"><p>{this.formatDDMM(weekdays[0].date)} - {this.formatDDMM(weekdays[weekdays.length - 1].date)}</p></div>
                     <div className="four wide column"></div>
                     <div className="two wide column">
-                        <Button>Lịch ngày</Button>
+                        <Button onClick={toggleViewMode}>{singleDayMode ? "Lịch tuần" : "Lịch ngày"}</Button>
                         <Button onClick={toggleCreateModal}>Tạo lịch học</Button>
                     </div>
                 </div>

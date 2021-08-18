@@ -41,8 +41,14 @@ export default class ScheduleForm extends Component {
             startTime: '09:00'
         }
 
-        axios.post('api/schedule/create', { schedule })
-            .then(response => console.log(response))
+        const getCreatedSessionsFrom = this.props.getCreatedSessionsFrom.date.toISOString();
+
+        axios.post('api/schedule/create', { schedule, getCreatedSessionsFrom })
+            .then(response => {
+                if (response && response.data && response.data.sessions) {
+                    this.props.handleOnScheduleCreated(response.data.sessions);
+                }
+            })
             .catch(error => console.error(error))
     }
 
