@@ -61,7 +61,22 @@ export default class FilterableCalendar extends Component {
 
     toggleViewMode = () => {
         this.setState(state => {
-            return { singleDayMode: !state.singleDayMode }
+            let weekdays = [...state.weekdays];
+            if (!state.singleDayMode) {
+                let selectedIndex = weekdays.findIndex(weekday => moment(weekday.date).isSame(new Date(), 'day'));
+                selectedIndex = selectedIndex !== -1 ? selectedIndex : 0;
+                let selectedWeekday = { ...weekdays[selectedIndex] };
+                selectedWeekday.selected = true;
+                weekdays[selectedIndex] = selectedWeekday;
+            } else {
+                let selectedIndex = weekdays.findIndex(weekday => weekday.selected);
+                if (selectedIndex !== -1) {
+                    let selectedWeekday = { ...weekdays[selectedIndex] }
+                    selectedWeekday.selected = false;
+                    weekdays[selectedIndex] = selectedWeekday;
+                }
+            }
+            return { singleDayMode: !state.singleDayMode, weekdays }
         })
     }
 
@@ -111,8 +126,8 @@ export default class FilterableCalendar extends Component {
                     />
                     {
                         loading ?
-                        <Loader active inline='centered'>Loading</Loader> :
-                        sessions && <CalendarTable weekdays={weekdays} singleDayMode={singleDayMode} sessions={sessions} />
+                            <Loader active inline='centered'>Loading</Loader> :
+                            sessions && <CalendarTable weekdays={weekdays} singleDayMode={singleDayMode} sessions={sessions} />
                     }
                 </div>
 

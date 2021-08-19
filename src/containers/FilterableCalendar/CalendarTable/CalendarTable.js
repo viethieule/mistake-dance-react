@@ -48,7 +48,7 @@ export default class CalendarTable extends Component {
     }
 
     render() {
-        const { weekdays } = this.props;
+        const { weekdays, singleDayMode } = this.props;
         const groupedSessions = this.groupSessions(this.props.sessions);
         return (
             <div>
@@ -56,7 +56,7 @@ export default class CalendarTable extends Component {
                     <Table.Header>
                         <Table.Row>
                             <Table.HeaderCell></Table.HeaderCell>
-                            {weekdays.map(weekday => (
+                            {weekdays.filter(weekday => singleDayMode ? weekday.selected : true).map(weekday => (
                                 <Table.HeaderCell key={weekday.date.getDate()}>{moment(weekday.date).format('ddd D/M')}</Table.HeaderCell>
                             ))}
                         </Table.Row>
@@ -69,7 +69,7 @@ export default class CalendarTable extends Component {
                                     {group.hours.toString() + ':' + group.minutes.toString()} - {(group.hours + 1).toString() + ':' + group.minutes.toString()}
                                 </Table.Cell>
                                 {
-                                    weekdays.map(weekday => {
+                                    weekdays.filter(weekday => singleDayMode ? weekday.selected : true).map(weekday => {
                                         const day = weekday.date.getDay();
                                         const sessions = group.sessions.filter(session => (new Date(session.date)).getDay() === day);
                                         
