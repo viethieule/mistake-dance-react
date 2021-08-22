@@ -21,16 +21,20 @@ export default class CalendarControls extends Component {
             weekdays,
             toggleCreateModal,
             singleDayMode,
-            toggleViewMode
+            toggleViewMode,
+            handleOnSelectWeekday
         } = this.props;
         return (
             <Grid>
                 <div className="sixteen column row">
                     <div className="eight wide column">
                         <button onClick={this.navigatePreviousWeek}>&lt;</button>
-                        {weekdays.map(weekday => (
-                            <button key={weekday.date.getDate()} className={styles.Circle}>{weekday.date.getDate()}</button>
-                        ))}
+                        {weekdays.map((weekday, dayIndex) => {
+                            const btnStyle = singleDayMode && weekday.selected ? styles.Circle : styles.CircleInactive;
+                            return (
+                                <button key={weekday.date.getDate()} className={btnStyle} onClick={() => handleOnSelectWeekday(dayIndex)}>{weekday.date.getDate()}</button>
+                            )
+                        })}
                         <button onClick={this.navigateNextWeek}>&gt;</button>
                     </div>
                     <div className="two wide column"><p>{this.formatDDMM(weekdays[0].date)} - {this.formatDDMM(weekdays[weekdays.length - 1].date)}</p></div>

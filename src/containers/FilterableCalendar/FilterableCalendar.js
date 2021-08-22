@@ -89,26 +89,74 @@ export default class FilterableCalendar extends Component {
         })
     }
 
-    handleOnWeekNavigating = (isNext) => {
-        this.setState(state => {
-            const weekdays = state.weekdays.map(weekday => {
-                if (isNext) {
-                    const date = moment(weekday.date).clone();
-                    return {
-                        ...weekday,
-                        date: date.add(7, 'days').toDate(),
-                    }
-                } else {
-                    const date = moment(weekday.date).clone().subtract(7, 'days').toDate();
-                    return {
-                        ...weekday,
-                        date,
-                    }
-                }
-            });
+    isFetchSchedulesOnWeekNavigating(isNext) {
+        const selectedDayIndex = this.state.weekdays.findIndex(x => x.selected);
+        const isNotFetch = this.state.singleDayMode && (
+            (!isNext && selectedDayIndex > 0) || 
+            (isNext && selectedDayIndex < this.state.weekdays.length - 1)
+        );
+        return !isNotFetch;
+    }
 
-            return { weekdays, sessions: [], loading: true }
-        }, () => this.fetchSchedules());
+    handleOnWeekNavigating = (isNext) => {
+        const isFetch = this.isFetchSchedulesOnWeekNavigating(isNext);
+        this.setState(state => {            
+            if (isFetch) {
+                const weekdays = state.weekdays.map((weekday, index, arr) => {
+                    if (isNext) {
+                        const date = moment(weekday.date).clone().add(7, 'days').toDate();
+                        return {
+                            date,
+                            selected: state.singleDayMode && index === 0
+                        }
+                    } else {
+                        const date = moment(weekday.date).clone().subtract(7, 'days').toDate();
+                        return {
+                            date,
+                            selected: state.singleDayMode && index === arr.length - 1
+                        }
+                    }
+                });
+
+                return { weekdays, sessions: [], loading: true }
+            } else {
+                const weekdays = [...state.weekdays];
+                const selectedDayIndex = weekdays.findIndex(x => x.selected);
+                const selectedDay = { ...weekdays[selectedDayIndex], selected: false };
+                const nextSelectedDay = { ...weekdays[selectedDayIndex + (isNext ? 1 : -1)], selected: true };
+                weekdays[selectedDayIndex] = selectedDay;
+                weekdays[selectedDayIndex + (isNext ? 1 : -1)] = nextSelectedDay;
+                return { weekdays }
+            }
+        }, () => {
+            if (isFetch) {
+                this.fetchSchedules()
+            }
+        });
+    }
+
+    handleOnSelectWeekday = (dayIndex) => {
+        const updatedState = {};
+        if (!this.state.singleDayMode) {
+            updatedState.singleDayMode = true;
+        }
+
+        const weekdays = [...this.state.weekdays];
+        let incomingSelectedDay;
+        const currentSelectedDayIndex = weekdays.findIndex(x => x.selected);
+        if (currentSelectedDayIndex === -1 ) {
+            incomingSelectedDay = { ...weekdays[dayIndex], selected: true };
+        } else if (currentSelectedDayIndex !== dayIndex) {
+            incomingSelectedDay = { ...weekdays[dayIndex], selected: true };
+            weekdays[currentSelectedDayIndex] = { ...weekdays[currentSelectedDayIndex], selected: false };
+        }
+
+        if (incomingSelectedDay) {
+            weekdays[dayIndex] = incomingSelectedDay;
+            updatedState.weekdays = weekdays;
+        }
+
+        this.setState(updatedState);
     }
 
     render() {
@@ -123,6 +171,7 @@ export default class FilterableCalendar extends Component {
                         singleDayMode={singleDayMode}
                         toggleViewMode={this.toggleViewMode}
                         handleOnWeekNavigating={this.handleOnWeekNavigating}
+                        handleOnSelectWeekday={this.handleOnSelectWeekday}
                     />
                     {
                         loading ?

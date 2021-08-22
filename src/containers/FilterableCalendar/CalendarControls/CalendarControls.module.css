@@ -1,5 +1,16 @@
-.Circle  {
+.Circle {
     border-radius: 50%;
     padding: 10px;
     text-align: center;
+}
+
+.CircleInactive {
+    padding: 10px;
+    display: inline-block;
+    background-color: white;
+    border: none;
+}
+
+.CircleInactive:hover {
+    cursor: pointer;
 }
