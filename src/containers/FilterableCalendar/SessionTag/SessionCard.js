@@ -2,9 +2,9 @@ import React, { Component } from 'react'
 
 export default class SessionCard extends Component {
     render() {
-        const { session } = this.props;
+        const { session, toggleSessionDetailModal } = this.props;
         return (
-            <div>
+            <div onClick={toggleSessionDetailModal}>
                 <p>{session.schedule.className}</p>
                 <p>{session.schedule.song}</p>
                 <br />

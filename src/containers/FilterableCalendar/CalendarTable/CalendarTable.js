@@ -48,7 +48,7 @@ export default class CalendarTable extends Component {
     }
 
     render() {
-        const { weekdays, singleDayMode } = this.props;
+        const { weekdays, singleDayMode, toggleSessionDetailModal } = this.props;
         const groupedSessions = this.groupSessions(this.props.sessions);
         return (
             <div>
@@ -78,7 +78,7 @@ export default class CalendarTable extends Component {
                                             card = (
                                                 <Fragment>
                                                     {sessions.map(session => (
-                                                        <SessionCard key={session.id} session={session} />
+                                                        <SessionCard key={session.id} session={session} toggleSessionDetailModal={toggleSessionDetailModal} />
                                                     ))}
                                                 </Fragment>
                                             )

@@ -5,6 +5,7 @@ import axios from '../../axios';
 import moment from 'moment';
 import ScheduleForm from './ScheduleForm/ScheduleForm';
 import { Loader } from 'semantic-ui-react';
+import SessionDetail from './SessionDetail/SessionDetail';
 
 export default class FilterableCalendar extends Component {
     state = {
@@ -15,6 +16,7 @@ export default class FilterableCalendar extends Component {
         singleDayMode: false,
         loading: true,
         openCreateSchedule: false,
+        openSessionDetail: false
     }
 
     initWeekdays() {
@@ -59,6 +61,10 @@ export default class FilterableCalendar extends Component {
         });
     }
 
+    toggleSessionDetailModal = () => {
+        this.setState({ openSessionDetail: !this.state.openSessionDetail });
+    }
+
     toggleViewMode = () => {
         this.setState(state => {
             let weekdays = [...state.weekdays];
@@ -92,7 +98,7 @@ export default class FilterableCalendar extends Component {
     isFetchSchedulesOnWeekNavigating(isNext) {
         const selectedDayIndex = this.state.weekdays.findIndex(x => x.selected);
         const isNotFetch = this.state.singleDayMode && (
-            (!isNext && selectedDayIndex > 0) || 
+            (!isNext && selectedDayIndex > 0) ||
             (isNext && selectedDayIndex < this.state.weekdays.length - 1)
         );
         return !isNotFetch;
@@ -100,7 +106,7 @@ export default class FilterableCalendar extends Component {
 
     handleOnWeekNavigating = (isNext) => {
         const isFetch = this.isFetchSchedulesOnWeekNavigating(isNext);
-        this.setState(state => {            
+        this.setState(state => {
             if (isFetch) {
                 const weekdays = state.weekdays.map((weekday, index, arr) => {
                     if (isNext) {
@@ -144,7 +150,7 @@ export default class FilterableCalendar extends Component {
         const weekdays = [...this.state.weekdays];
         let incomingSelectedDay;
         const currentSelectedDayIndex = weekdays.findIndex(x => x.selected);
-        if (currentSelectedDayIndex === -1 ) {
+        if (currentSelectedDayIndex === -1) {
             incomingSelectedDay = { ...weekdays[dayIndex], selected: true };
         } else if (currentSelectedDayIndex !== dayIndex) {
             incomingSelectedDay = { ...weekdays[dayIndex], selected: true };
@@ -160,7 +166,7 @@ export default class FilterableCalendar extends Component {
     }
 
     render() {
-        const { weekdays, sessions, loading, openCreateSchedule, singleDayMode } = this.state;
+        const { weekdays, sessions, loading, openCreateSchedule, openSessionDetail, singleDayMode } = this.state;
         return (
             <div>
                 <h3>Lịch các lớp</h3>
@@ -176,16 +182,25 @@ export default class FilterableCalendar extends Component {
                     {
                         loading ?
                             <Loader active inline='centered'>Loading</Loader> :
-                            sessions && <CalendarTable weekdays={weekdays} singleDayMode={singleDayMode} sessions={sessions} />
+                            sessions && <CalendarTable
+                                weekdays={weekdays}
+                                singleDayMode={singleDayMode}
+                                sessions={sessions} 
+                                toggleSessionDetailModal={this.toggleSessionDetailModal}
+                            />
                     }
                 </div>
 
                 <ScheduleForm
-                    openCreateSchedule={openCreateSchedule}
                     handleOnScheduleCreated={this.handleOnScheduleCreated}
                     getCreatedSessionsFrom={weekdays[0]}
                     open={openCreateSchedule}
                     onClose={this.toggleCreateModal}
+                />
+
+                <SessionDetail
+                    open={openSessionDetail}
+                    onClose={this.toggleSessionDetailModal}
                 />
             </div>
         )
