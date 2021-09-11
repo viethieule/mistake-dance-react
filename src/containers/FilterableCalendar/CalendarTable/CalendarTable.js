@@ -78,7 +78,7 @@ export default class CalendarTable extends Component {
                                             card = (
                                                 <Fragment>
                                                     {sessions.map(session => (
-                                                        <SessionCard key={session.id} session={session} toggleSessionDetailModal={toggleSessionDetailModal} />
+                                                        <SessionCard key={session.id} session={session} toggleSessionDetailModal={() => toggleSessionDetailModal(session)} />
                                                     ))}
                                                 </Fragment>
                                             )

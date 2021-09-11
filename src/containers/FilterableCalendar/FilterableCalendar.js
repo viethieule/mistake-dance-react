@@ -5,7 +5,7 @@ import axios from '../../axios';
 import moment from 'moment';
 import ScheduleForm from './ScheduleForm/ScheduleForm';
 import { Loader } from 'semantic-ui-react';
-import SessionDetail from './SessionDetail/SessionDetail';
+import { history } from '../../';
 
 export default class FilterableCalendar extends Component {
     state = {
@@ -15,8 +15,7 @@ export default class FilterableCalendar extends Component {
         selectedSession: null,
         singleDayMode: false,
         loading: true,
-        openCreateSchedule: false,
-        openSessionDetail: false
+        openCreateSchedule: false
     }
 
     initWeekdays() {
@@ -61,8 +60,10 @@ export default class FilterableCalendar extends Component {
         });
     }
 
-    toggleSessionDetailModal = () => {
-        this.setState({ openSessionDetail: !this.state.openSessionDetail });
+    toggleSessionDetailModal = (session) => {
+        history.push('/sessions/' + session.id, {
+            session
+        });
     }
 
     toggleViewMode = () => {
@@ -166,7 +167,7 @@ export default class FilterableCalendar extends Component {
     }
 
     render() {
-        const { weekdays, sessions, loading, openCreateSchedule, openSessionDetail, singleDayMode } = this.state;
+        const { weekdays, sessions, loading, openCreateSchedule, singleDayMode } = this.state;
         return (
             <div>
                 <h3>Lịch các lớp</h3>
@@ -196,11 +197,6 @@ export default class FilterableCalendar extends Component {
                     getCreatedSessionsFrom={weekdays[0]}
                     open={openCreateSchedule}
                     onClose={this.toggleCreateModal}
-                />
-
-                <SessionDetail
-                    open={openSessionDetail}
-                    onClose={this.toggleSessionDetailModal}
                 />
             </div>
         )
