@@ -1,12 +1,9 @@
-import React, { Component } from 'react'
-import { Button, Grid, Modal, Input, Icon } from 'semantic-ui-react'
+import React, { Component, Fragment } from 'react'
+import { Button, Grid, Modal, Input, Icon, Table, Label } from 'semantic-ui-react'
 import { history } from '../../..';
 import moment from 'moment';
 import axios from '../../../axios'
-
-export class TextInput extends Component {
-
-}
+import { RegistrationStatus } from '../../../enums/enums';
 
 export default class SessionDetail extends Component {
     state = {
@@ -19,7 +16,8 @@ export default class SessionDetail extends Component {
         const session = this.props.location && this.props.location.state && this.props.location.state.session;
 
         if (session) {
-            axios.post('api/registration/getbyscheduledetail', { '': session.id })
+            const data = JSON.stringify(session.id);
+            axios.post('api/registration/getbyscheduledetail', data, { headers: { 'Content-Type': 'application/json' } })
                 .then(response => {
                     console.log(response);
                     if (response && response.data) {
@@ -35,6 +33,50 @@ export default class SessionDetail extends Component {
         this.setState({ search: e.target.value })
     }
 
+    hideSearchResults = () => {
+        this.setState({ usersFound: null })
+    }
+
+    registerSession = (userId) => {
+        const { session } = this.props.location.state;
+        const data = {
+            registration: {
+                scheduleDetailId: session.id,
+                userId
+            }
+        };
+        axios.post('api/registration/create', data)
+            .then(response => {
+                console.log(response);
+                if (response && response.data && response.data.registration) {
+                    const { registration } = response.data;
+                    this.setState({ registration: [...this.state.registrations, registration] });
+                }
+            })
+            .catch(err => console.log(err));
+    }
+
+    confirmRegistration = registrationId => {
+        axios.put('api/registration/confirmAttendance/' + registrationId)
+            .then(response => {
+                console.log(response);
+                if (response && response.status === 200) {
+                    
+                }
+            })
+            .catch(error => console.log(error))
+    }
+
+    cancelRegistration = registrationId => {
+        axios.post('api/registration/cancel', { registrationId })
+            .then(response => {
+                console.log(response);
+                if (response && response.data) {
+
+                }
+            })
+    }
+
     search = () => {
         const { search } = this.state;
         if (!search) return;
@@ -44,7 +86,7 @@ export default class SessionDetail extends Component {
                 console.log(response);
                 if (response && response.data && response.data.members) {
                     const usersFound = response.data.members;
-                    this.setState({ usersFound })    
+                    this.setState({ usersFound })
                 }
             })
             .catch((error) => {
@@ -60,15 +102,47 @@ export default class SessionDetail extends Component {
         const { schedule } = session;
         const date = moment(session.date).format('ddd DD/MM/YYYY hh:mm');
 
+        const { usersFound, registrations } = this.state;
+
+        let searchResults;
+        if (!usersFound) {
+            searchResults = null;
+        } else if (usersFound.length === 0) {
+            searchResults = (
+                <Grid.Row>
+                    <Grid.Column><p>Không tìm thấy hội viên nào</p></Grid.Column>
+                </Grid.Row>
+            )
+        } else {
+            searchResults = (
+                <Grid.Row>
+                    <Grid.Column>
+                        <Table>
+                            <Table.Body>
+                                {usersFound.map(user => (
+                                    <Table.Row key={user.id}>
+                                        <Table.Cell>{user.fullName}</Table.Cell>
+                                        <Table.Cell>{user.userName}</Table.Cell>
+                                        <Table.Cell>{user.phoneNumber}</Table.Cell>
+                                        <Table.Cell>
+                                            <Button size="mini" onClick={() => this.registerSession(user.id)}>Đăng ký</Button>
+                                        </Table.Cell>
+                                    </Table.Row>
+                                ))}
+                            </Table.Body>
+                        </Table>
+                    </Grid.Column>
+                </Grid.Row>
+            )
+        }
+
         return (
-            <Modal
-                open={true}
-            >
+            <Modal open={true}>
                 <Modal.Header>{schedule.className} - {date}</Modal.Header>
                 <Modal.Content>
                     <Grid>
                         <Grid.Column width={4}>
-                            <label basic>Bài múa</label>
+                            <label>Bài múa</label>
                             <p><b>{schedule.song}</b></p>
                             <label>Buổi</label>
                             <p><b>{session.sessionNo} / {schedule.sessions}</b></p>
@@ -90,12 +164,50 @@ export default class SessionDetail extends Component {
                                         <label>Danh sách đăng ký</label>
                                     </Grid.Column>
                                     <Grid.Column width={6}>
-                                        <Input onChange={this.searchOnChange} icon={<Icon name="search" circular link onClick={this.search} />} placeholder="Tim kiếm..." />
+                                        <Input
+                                            onChange={this.searchOnChange}
+                                            icon={<Icon name="search" circular link onClick={this.search} />}
+                                            placeholder="Tim kiếm..."
+                                            size="mini"
+                                            fluid={!usersFound}
+                                        />
+                                        {' '}
+                                        {!!usersFound &&
+                                            <Button color="red" size="mini" icon onClick={this.hideSearchResults}>
+                                                <Icon name="close" />
+                                            </Button>
+                                        }
                                     </Grid.Column>
                                 </Grid.Row>
-                                <Grid.Row>
-
-                                </Grid.Row>
+                                {searchResults}
+                                {
+                                    registrations.length > 0 ?
+                                        <Grid.Row>
+                                            <Grid.Column>
+                                                <Table>
+                                                    <Table.Body>
+                                                        {registrations.map((registration, index) => (
+                                                            <Table.Row key={registration.id}>
+                                                                <Table.Cell>{index + 1}</Table.Cell>
+                                                                <Table.Cell>{registration.user.fullName}</Table.Cell>
+                                                                <Table.Cell>
+                                                                    {
+                                                                        registration.status.value === RegistrationStatus.Registered ?
+                                                                            <Fragment>
+                                                                                <Button size="mini" icon onClick={() => this.confirmRegistration(registration.id)}><Icon name="check" /> Đến lớp</Button>
+                                                                                <Button size="mini" icon onClick={() => this.cancelRegistration(registration.id)}><Icon name="close" /> Hủy</Button>
+                                                                            </Fragment> :
+                                                                            <Label><Icon name="check" /> {registration.status.name}</Label>
+                                                                    }
+                                                                </Table.Cell>
+                                                            </Table.Row>
+                                                        ))}
+                                                    </Table.Body>
+                                                </Table>
+                                            </Grid.Column>
+                                        </Grid.Row> :
+                                        null
+                                }
                             </Grid>
                         </Grid.Column>
                     </Grid>
@@ -104,13 +216,6 @@ export default class SessionDetail extends Component {
                     <Button color='black' onClick={() => history.goBack()}>
                         Đóng
                     </Button>
-                    {/* <Button
-                        content="Yep, that's me"
-                        labelPosition='right'
-                        icon='checkmark'
-                        onClick={}
-                        positive
-                    /> */}
                 </Modal.Actions>
             </Modal>
         )
