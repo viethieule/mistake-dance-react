@@ -1,15 +1,36 @@
 import React, { Component, Fragment } from 'react'
-import { Button, Grid, Modal, Input, Icon, Table, Label } from 'semantic-ui-react'
+import { Button, Grid, Modal, Input, Icon, Table, Label, Loader, Dimmer } from 'semantic-ui-react'
 import { history } from '../../..';
 import moment from 'moment';
 import axios from '../../../axios'
 import { RegistrationStatus } from '../../../enums/enums';
+import { updateItem } from '../../../utils/utils';
 
 export default class SessionDetail extends Component {
     state = {
         search: '',
         usersFound: null,
-        registrations: []
+        registrations: [],
+        loading: {
+            search: false,
+            sessions: true,
+            registerSession: false,
+            confirmRegistration: false,
+            cancelRegistration: false
+        },
+        target: {
+            confirmRegistrationId: null,
+            cancelRegistrationId: null,
+            userFoundId: null
+        }
+    }
+
+    setLoading = (attributes) => {
+        this.setState({ loading: { ...this.state.loading, ...attributes } })
+    }
+
+    setTarget = (attributes) => {
+        this.setState({ target: { ...this.state.target, ...attributes } })
     }
 
     componentDidMount() {
@@ -21,11 +42,14 @@ export default class SessionDetail extends Component {
                 .then(response => {
                     console.log(response);
                     if (response && response.data) {
-                        const registrations = response.data
-                        this.setState({ registrations })
+                        const registrations = response.data;
+                        this.setState({ registrations });
                     }
                 })
-                .catch(err => console.log(err));
+                .catch(err => console.log(err))
+                .finally(() => {
+                    this.setLoading({ sessions: false });
+                });
         }
     }
 
@@ -45,35 +69,58 @@ export default class SessionDetail extends Component {
                 userId
             }
         };
+
+        this.setLoading({ registerSession: true });
+        this.setTarget({ userFoundId: userId });
         axios.post('api/registration/create', data)
             .then(response => {
                 console.log(response);
                 if (response && response.data && response.data.registration) {
                     const { registration } = response.data;
-                    this.setState({ registration: [...this.state.registrations, registration] });
+                    this.setState({ registrations: [...this.state.registrations, registration], usersFound: null });
                 }
             })
-            .catch(err => console.log(err));
+            .catch(err => console.log(err))
+            .finally(() => {
+                this.setLoading({ registerSession: false });
+                this.setTarget({ userFoundId: null });
+            });
     }
 
     confirmRegistration = registrationId => {
+        this.setLoading({ confirmRegistration: true });
+        this.setTarget({ confirmRegistrationId: registrationId });
         axios.put('api/registration/confirmAttendance/' + registrationId)
             .then(response => {
                 console.log(response);
-                if (response && response.status === 200) {
-                    
+                if (response && response.status === 204) {
+                    const updatedRegistrations = updateItem(this.state.registrations, registrationId, { status: { value: RegistrationStatus.Attended, name: 'Đến lớp' } });
+                    this.setState({ registrations: updatedRegistrations });
                 }
             })
             .catch(error => console.log(error))
+            .finally(() => {
+                this.setLoading({ confirmRegistration: false });
+                this.setTarget({ confirmRegistrationId: null });
+            });
     }
 
     cancelRegistration = registrationId => {
+        this.setLoading({ cancelRegistration: true });
+        this.setTarget({ cancelRegistrationId: registrationId });
         axios.post('api/registration/cancel', { registrationId })
             .then(response => {
                 console.log(response);
                 if (response && response.data) {
-
+                    this.setState({
+                        registrations: [...this.state.registrations.filter(x => x.id !== registrationId)]
+                    });
                 }
+            })
+            .catch(err => console.log(err))
+            .finally(() => {
+                this.setLoading({ cancelRegistration: false });
+                this.setTarget({ cancelRegistrationId: null });
             })
     }
 
@@ -81,6 +128,7 @@ export default class SessionDetail extends Component {
         const { search } = this.state;
         if (!search) return;
 
+        this.setLoading({ search: true });
         axios.post('api/user/searchMember', { query: this.state.search })
             .then((response) => {
                 console.log(response);
@@ -92,6 +140,9 @@ export default class SessionDetail extends Component {
             .catch((error) => {
                 console.log(error)
             })
+            .finally(() => {
+                this.setLoading({ search: false });
+            })
     }
 
     render() {
@@ -102,7 +153,7 @@ export default class SessionDetail extends Component {
         const { schedule } = session;
         const date = moment(session.date).format('ddd DD/MM/YYYY hh:mm');
 
-        const { usersFound, registrations } = this.state;
+        const { usersFound, registrations, loading, target } = this.state;
 
         let searchResults;
         if (!usersFound) {
@@ -125,7 +176,7 @@ export default class SessionDetail extends Component {
                                         <Table.Cell>{user.userName}</Table.Cell>
                                         <Table.Cell>{user.phoneNumber}</Table.Cell>
                                         <Table.Cell>
-                                            <Button size="mini" onClick={() => this.registerSession(user.id)}>Đăng ký</Button>
+                                            <Button size="mini" loading={loading.registerSession && user.id === target.userFoundId} onClick={() => this.registerSession(user.id)}>Đăng ký</Button>
                                         </Table.Cell>
                                     </Table.Row>
                                 ))}
@@ -155,7 +206,7 @@ export default class SessionDetail extends Component {
                             <label>Giáo viên</label>
                             <p><b>{schedule.trainer.name}</b></p>
                             <label>Số học viên đăng ký</label>
-                            <p><b>{session.totalRegistered}</b></p>
+                            <p><b>{registrations.length}</b></p>
                         </Grid.Column>
                         <Grid.Column width={12}>
                             <Grid>
@@ -173,7 +224,7 @@ export default class SessionDetail extends Component {
                                         />
                                         {' '}
                                         {!!usersFound &&
-                                            <Button color="red" size="mini" icon onClick={this.hideSearchResults}>
+                                            <Button disabled={loading.search} loading={loading.search} color="red" size="mini" icon onClick={this.hideSearchResults}>
                                                 <Icon name="close" />
                                             </Button>
                                         }
@@ -181,32 +232,56 @@ export default class SessionDetail extends Component {
                                 </Grid.Row>
                                 {searchResults}
                                 {
-                                    registrations.length > 0 ?
+                                    loading.sessions ?
                                         <Grid.Row>
                                             <Grid.Column>
-                                                <Table>
-                                                    <Table.Body>
-                                                        {registrations.map((registration, index) => (
-                                                            <Table.Row key={registration.id}>
-                                                                <Table.Cell>{index + 1}</Table.Cell>
-                                                                <Table.Cell>{registration.user.fullName}</Table.Cell>
-                                                                <Table.Cell>
-                                                                    {
-                                                                        registration.status.value === RegistrationStatus.Registered ?
-                                                                            <Fragment>
-                                                                                <Button size="mini" icon onClick={() => this.confirmRegistration(registration.id)}><Icon name="check" /> Đến lớp</Button>
-                                                                                <Button size="mini" icon onClick={() => this.cancelRegistration(registration.id)}><Icon name="close" /> Hủy</Button>
-                                                                            </Fragment> :
-                                                                            <Label><Icon name="check" /> {registration.status.name}</Label>
-                                                                    }
-                                                                </Table.Cell>
-                                                            </Table.Row>
-                                                        ))}
-                                                    </Table.Body>
-                                                </Table>
+                                                <Dimmer active inverted>
+                                                    <Loader inline='centered' inverted>Loading</Loader>
+                                                </Dimmer>
                                             </Grid.Column>
                                         </Grid.Row> :
-                                        null
+                                        registrations.length > 0 ?
+                                            <Grid.Row>
+                                                <Grid.Column>
+                                                    <Table>
+                                                        <Table.Body>
+                                                            {registrations.map((registration, index) => (
+                                                                <Table.Row key={registration.id}>
+                                                                    <Table.Cell>{index + 1}</Table.Cell>
+                                                                    <Table.Cell>{registration.user.fullName}</Table.Cell>
+                                                                    <Table.Cell>
+                                                                        {
+                                                                            registration.status.value === RegistrationStatus.Registered ?
+                                                                                <Fragment>
+                                                                                    <Button
+                                                                                        loading={loading.confirmRegistration && registration.id === target.confirmRegistrationId}
+                                                                                        size="mini" 
+                                                                                        icon 
+                                                                                        onClick={() => this.confirmRegistration(registration.id)}
+                                                                                    >
+                                                                                        <Icon name="check" /> Đến lớp
+                                                                                    </Button>
+                                                                                    <Button
+                                                                                        loading={loading.cancelRegistration && registration.id === target.cancelRegistrationId} 
+                                                                                        size="mini"
+                                                                                        icon
+                                                                                        onClick={() => this.cancelRegistration(registration.id)}
+                                                                                    >
+                                                                                        <Icon name="close" /> Hủy
+                                                                                    </Button>
+                                                                                </Fragment> :
+                                                                                <Label>
+                                                                                    <Icon name="check" /> {registration.status.name}
+                                                                                </Label>
+                                                                        }
+                                                                    </Table.Cell>
+                                                                </Table.Row>
+                                                            ))}
+                                                        </Table.Body>
+                                                    </Table>
+                                                </Grid.Column>
+                                            </Grid.Row> :
+                                            null
                                 }
                             </Grid>
                         </Grid.Column>
