@@ -10,12 +10,11 @@ function App() {
   return (
     <Layout>
       <Switch>
+        {/* <Route path="/sessions/:id" component={SessionDetail}/> */}
         <Route path={["/", "/sessions/:id"]} exact component={FilterableCalendar}></Route>
         <Route path="/login" component={LoginForm}></Route>
         <Redirect to="/"></Redirect>
       </Switch>
-
-      <Route path="/sessions/:id" component={SessionDetail}/>
     </Layout>
   );
 }

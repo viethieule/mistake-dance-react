@@ -10,17 +10,43 @@ import axios from '../../../axios';
 import TimeInput from '../../../components/form/TimeInput';
 
 export default class ScheduleForm extends Component {
-    state = {
-        session: {
-            id: '',
-            className: '',
-            song: '',
-            openingDate: '',
-            startTime: '',
-            weekdays: [],
-            sessions: '',
-            trainer: '',
-            branch: ''
+    constructor(props) {
+        super(props);
+
+        if (props.session) {
+            const { schedule, id } = props.session;
+            this.state = {
+                session: {
+                    id,
+                    className: schedule.classId.toString(),
+                    song: schedule.song,
+                    openingDate: new Date(schedule.openingDate),
+                    startTime: schedule.startTime,
+                    weekdays: schedule.daysPerWeek.split('').map(x => parseInt(x)).sort(),
+                    sessions: schedule.sessions,
+                    trainer: schedule.trainerId.toString(),
+                    branch: schedule.branch
+                }
+            }
+        } else {
+            const { datetime: selectedDatetime } = props;
+            const startTime = selectedDatetime ? moment(selectedDatetime).format('HH:mm') : '';
+            const weekdays = selectedDatetime ? [selectedDatetime.getDay()] : [];
+            const openingDate = selectedDatetime ? selectedDatetime : new Date();
+
+            this.state = {
+                session: {
+                    id: '',
+                    className: '',
+                    song: '',
+                    openingDate,
+                    startTime,
+                    weekdays,
+                    sessions: '',
+                    trainer: '',
+                    branch: ''
+                }
+            }
         }
     }
 
@@ -37,19 +63,27 @@ export default class ScheduleForm extends Component {
             openingDate: moment(values.openingDate).format('MM-DD-YYYY'),
             daysPerWeek: values.weekdays.sort().join(''),
             classId: values.className,
-            trainerId: values.trainer,
-            startTime: '09:00'
+            className: null,
+            trainerId: values.trainer
         }
 
-        const getCreatedSessionsFrom = this.props.getCreatedSessionsFrom.date.toISOString();
-
-        axios.post('api/schedule/create', { schedule, getCreatedSessionsFrom })
-            .then(response => {
-                if (response && response.data && response.data.sessions) {
-                    this.props.handleOnScheduleCreated(response.data.sessions);
-                }
-            })
-            .catch(error => console.error(error))
+        const { session } = this.props;
+        if (session.id) {
+            axios.post('api/schedule/update', { schedule: { ...schedule, id: session.schedule.id }, selectedScheduleDetailId: session.id })
+                .then(response => {
+                    console.log(response);
+                })
+                .catch(err => console.log(err));
+        } else {
+            const getCreatedSessionsFrom = this.props.getCreatedSessionsFrom.date.toISOString();
+            axios.post('api/schedule/create', { schedule, getCreatedSessionsFrom })
+                .then(response => {
+                    if (response && response.data && response.data.sessions) {
+                        this.props.handleOnScheduleCreated(response.data.sessions);
+                    }
+                })
+                .catch(error => console.error(error))
+        }
     }
 
     render() {
@@ -59,7 +93,7 @@ export default class ScheduleForm extends Component {
             <Modal
                 open={open}
             >
-                <Modal.Header>Tạo lịch học</Modal.Header>
+                <Modal.Header>{session.id ? 'Sửa' : 'Tạo'} lịch học</Modal.Header>
                 <FinalForm
                     initialValues={session}
                     onSubmit={this.handleFormSubmit}
@@ -129,7 +163,7 @@ export default class ScheduleForm extends Component {
                                             name="trainer"
                                             label="Giáo viên"
                                             width={6}
-                                            value={session.traner}
+                                            value={session.trainer}
                                             options={'api/trainer/dropdown'}
                                             component={SelectInput}
                                         />

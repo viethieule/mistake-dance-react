@@ -34,7 +34,7 @@ export default class SessionDetail extends Component {
     }
 
     componentDidMount() {
-        const session = this.props.location && this.props.location.state && this.props.location.state.session;
+        const { session } = this.props;
 
         if (session) {
             const data = JSON.stringify(session.id);
@@ -62,7 +62,7 @@ export default class SessionDetail extends Component {
     }
 
     registerSession = (userId) => {
-        const { session } = this.props.location.state;
+        const { session } = this.props;
         const data = {
             registration: {
                 scheduleDetailId: session.id,
@@ -147,8 +147,14 @@ export default class SessionDetail extends Component {
 
     render() {
         const {
-            session
-        } = this.props.location.state;
+            session,
+            onClose,
+            onEdit
+        } = this.props;
+
+        if (!session) {
+            return null;
+        }
 
         const { schedule } = session;
         const date = moment(session.date).format('ddd DD/MM/YYYY hh:mm');
@@ -288,7 +294,10 @@ export default class SessionDetail extends Component {
                     </Grid>
                 </Modal.Content>
                 <Modal.Actions>
-                    <Button color='black' onClick={() => history.goBack()}>
+                    <Button color="blue" onClick={onEdit}>
+                        Sửa
+                    </Button>
+                    <Button color='black' onClick={onClose}>
                         Đóng
                     </Button>
                 </Modal.Actions>

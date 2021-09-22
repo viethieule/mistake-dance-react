@@ -2,6 +2,7 @@ import React, { Component, Fragment } from 'react'
 import { Table } from 'semantic-ui-react'
 import SessionCard from '../SessionTag/SessionCard'
 import moment from 'moment'
+import styles from './CalendarTable.module.css'
 
 const DEFAULT_TIME_SLOTS = [
     { hours: 9, minutes: 0 },
@@ -17,6 +18,11 @@ const DEFAULT_TIME_SLOTS = [
 ]
 
 export default class CalendarTable extends Component {
+    state = {
+        cellEntered: {
+            day: null, hours: null, minutes: null
+        }
+    }
     timeSlotComparer(t1, t2) {
         const { hours: h1, minutes: m1 } = t1;
         const { hours: h2, minutes: m2 } = t2;
@@ -47,8 +53,35 @@ export default class CalendarTable extends Component {
         return groupedSessions;
     }
 
+    handleMouseEnterCell = (cellDatetimeData) => {
+        this.setState({ cellEntered: cellDatetimeData })
+    }
+
+    handleMouseLeaveCell = () => {
+        this.setState({ cellEntered: {} })
+    }
+
+    openCreateModal = ({ date, hours, minutes, haveSessions }) => {
+        if (haveSessions) {
+            return;
+        }
+
+        date = new Date(date.getTime());
+        date.setHours(hours);
+        date.setMinutes(minutes);
+
+        this.props.toggleCreateModal(date);
+    }
+
     render() {
-        const { weekdays, singleDayMode, toggleSessionDetailModal } = this.props;
+        const { 
+            weekdays, 
+            singleDayMode, 
+            toggleSessionDetailModal
+        } = this.props;
+
+        const { cellEntered } = this.state;
+
         const groupedSessions = this.groupSessions(this.props.sessions);
         return (
             <div>
@@ -72,9 +105,13 @@ export default class CalendarTable extends Component {
                                     weekdays.filter(weekday => singleDayMode ? weekday.selected : true).map(weekday => {
                                         const day = weekday.date.getDay();
                                         const sessions = group.sessions.filter(session => (new Date(session.date)).getDay() === day);
+                                        const isHovered = !!cellEntered && day === cellEntered.day && group.hours === cellEntered.hours && group.minutes === cellEntered.minutes;
                                         
                                         let card = null;
-                                        if (sessions && sessions.length) {
+                                        let textAlign = null;
+                                        let verticalAlign = null;
+                                        const haveSessions = !!sessions && sessions.length
+                                        if (haveSessions) {
                                             card = (
                                                 <Fragment>
                                                     {sessions.map(session => (
@@ -82,10 +119,27 @@ export default class CalendarTable extends Component {
                                                     ))}
                                                 </Fragment>
                                             )
+                                        } else if (isHovered) {
+                                            card = <p>Tạo<br/>lịch học</p>
+                                            textAlign = 'center'
+                                            verticalAlign = 'middle'
                                         }
 
                                         return (
-                                            <Table.Cell key={day}>
+                                            <Table.Cell 
+                                                verticalAlign={verticalAlign} 
+                                                textAlign={textAlign} 
+                                                key={day} 
+                                                onMouseEnter={() => this.handleMouseEnterCell({ day, hours: group.hours, minutes: group.minutes })} 
+                                                onMouseLeave={() => this.handleMouseLeaveCell()}
+                                                onClick={() => this.openCreateModal({ 
+                                                    date: weekday.date, 
+                                                    hours: group.hours, 
+                                                    minutes: group.minutes, 
+                                                    haveSessions 
+                                                })}
+                                                className={styles.TableCell}
+                                            >
                                                 {card}
                                             </Table.Cell>
                                         )

@@ -41,7 +41,7 @@ export default class CalendarControls extends Component {
                     <div className="four wide column"></div>
                     <div className="two wide column">
                         <Button onClick={toggleViewMode}>{singleDayMode ? "Lịch tuần" : "Lịch ngày"}</Button>
-                        <Button onClick={toggleCreateModal}>Tạo lịch học</Button>
+                        <Button onClick={() => toggleCreateModal()}>Tạo lịch học</Button>
                     </div>
                 </div>
             </Grid>

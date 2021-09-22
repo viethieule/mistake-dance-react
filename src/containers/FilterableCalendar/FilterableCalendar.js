@@ -6,6 +6,8 @@ import moment from 'moment';
 import ScheduleForm from './ScheduleForm/ScheduleForm';
 import { Loader } from 'semantic-ui-react';
 import { history } from '../../';
+import { Route } from 'react-router';
+import SessionDetail from './SessionDetail/SessionDetail';
 
 export default class FilterableCalendar extends Component {
     state = {
@@ -15,7 +17,8 @@ export default class FilterableCalendar extends Component {
         selectedSession: null,
         singleDayMode: false,
         loading: true,
-        openCreateSchedule: false
+        openCreateSchedule: false,
+        selectedDateTimeForCreate: null
     }
 
     initWeekdays() {
@@ -54,16 +57,28 @@ export default class FilterableCalendar extends Component {
             })
     }
 
-    toggleCreateModal = () => {
-        this.setState((state) => {
-            return { openCreateSchedule: !state.openCreateSchedule };
+    toggleCreateModal = (date) => {
+        this.setState(state => {
+            const newState = { openCreateSchedule: !state.openCreateSchedule };
+            if (!state.openCreateSchedule) {
+                newState.selectedDateTimeForCreate = date;
+            }
+            return newState;
         });
     }
 
+    handleEditSchedule = () => {
+        this.setState({ openCreateSchedule: true })
+    }
+
     toggleSessionDetailModal = (session) => {
-        history.push('/sessions/' + session.id, {
-            session
-        });
+        this.setState({ selectedSession: session });
+        history.push('/sessions/' + session.id);
+    }
+
+    handleCloseSessionDetailModal = () => {
+        history.goBack();
+        this.setState({ selectedSession: null });
     }
 
     toggleViewMode = () => {
@@ -166,11 +181,23 @@ export default class FilterableCalendar extends Component {
         this.setState(updatedState);
     }
 
+    buildScheduleFormKey = () => {
+        const { selectedSession: session, selectedDateTimeForCreate } = this.state;
+        if (session) {
+            return session.id; 
+        } else if (selectedDateTimeForCreate) {
+            return selectedDateTimeForCreate.getTime();
+        }
+
+        return null;
+    }
+
     render() {
-        const { weekdays, sessions, loading, openCreateSchedule, singleDayMode } = this.state;
+        const { weekdays, sessions, loading, openCreateSchedule, singleDayMode, selectedDateTimeForCreate, selectedSession } = this.state;
+        const scheduleFormKey = this.buildScheduleFormKey();
         return (
             <div>
-                <h3>Lịch các lớp</h3>
+                <h3>Lịch các lớp - {scheduleFormKey}</h3>
                 <div>
                     <CalendarControls
                         weekdays={weekdays}
@@ -188,6 +215,7 @@ export default class FilterableCalendar extends Component {
                                 singleDayMode={singleDayMode}
                                 sessions={sessions} 
                                 toggleSessionDetailModal={this.toggleSessionDetailModal}
+                                toggleCreateModal={this.toggleCreateModal}
                             />
                     }
                 </div>
@@ -197,7 +225,14 @@ export default class FilterableCalendar extends Component {
                     getCreatedSessionsFrom={weekdays[0]}
                     open={openCreateSchedule}
                     onClose={this.toggleCreateModal}
+                    datetime={selectedDateTimeForCreate}
+                    session={selectedSession}
+                    key={scheduleFormKey}
                 />
+
+                <Route path="/sessions/:id" render={routeProps => (
+                    <SessionDetail session={selectedSession} onEdit={this.handleEditSchedule} onClose={this.handleCloseSessionDetailModal} {...routeProps} />
+                )} />
             </div>
         )
     }
