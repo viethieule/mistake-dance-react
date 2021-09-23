@@ -1,3 +1,7 @@
 .TableCell:hover {
     cursor: pointer;
 }
+
+.CellTime {
+    text-align: center;
+}

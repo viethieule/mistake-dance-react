@@ -22,8 +22,8 @@ export default class SessionCard extends Component {
             <div className={`${styles.SessionCard} ${branchClassName}`} onClick={toggleSessionDetailModal}>
                 <p className={styles.ClassName}>{session.schedule.className}</p>
                 <p className={styles.Song}>{session.schedule.song}</p>
-                <br />
-                <p>{session.sessionNo}/{session.schedule.sessions} - {session.totalRegistered}/20 - {session.schedule.branch}</p>
+                {/* <br /> */}
+                <p className={styles.Info}>{session.sessionNo}/{session.schedule.sessions} - {session.totalRegistered}/20 - {session.schedule.branch}</p>
             </div>
         )
     }

@@ -8,6 +8,7 @@ import { Container, Loader } from 'semantic-ui-react';
 import { history } from '../../';
 import { Route } from 'react-router';
 import SessionDetail from './SessionDetail/SessionDetail';
+import styles from './FilterableCalendar.module.css'
 
 export default class FilterableCalendar extends Component {
     state = {
@@ -211,7 +212,7 @@ export default class FilterableCalendar extends Component {
         const scheduleFormKey = this.buildScheduleFormKey();
         return (
             <div>
-                <Container>
+                <Container className={styles.Container}>
                     <h3>Lịch các lớp</h3>
                     <CalendarControls
                         weekdays={weekdays}

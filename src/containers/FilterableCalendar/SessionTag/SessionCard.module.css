@@ -1,28 +1,41 @@
 .SessionCard {
     padding: 16px;
-    /* color: white; */
     border-radius: 10px;
-    border: 2px solid;
+    /* border: 2px solid; */
+    color: white;
+    width: 100%;
 }
 
 .SessionCardRed {
-    border-color: #FF4171;
+    background: #FF4171;
 }
 
 .SessionCardGreen {
-    border-color: #49B583;
+    background: #49B583;
 }
 
 .SessionCardYellow {
-    border-color: #FFBD69;
+    background: #FFBD69;
 }
 
 .ClassName {
     font-size: 1.1em;
     margin-bottom: 0.2em;
     font-weight: bold;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .Song {
-    margin-bottom: 0.4em
+    margin-bottom: 0.4em;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    line-height: 1.5em;
+    height: 3em;
+    font-size: 12px;
+}
+
+.Info {
+    font-size: 12px;
 }

@@ -74,9 +74,9 @@ export default class CalendarTable extends Component {
     }
 
     render() {
-        const { 
-            weekdays, 
-            singleDayMode, 
+        const {
+            weekdays,
+            singleDayMode,
             toggleSessionDetailModal
         } = this.props;
 
@@ -85,12 +85,12 @@ export default class CalendarTable extends Component {
         const groupedSessions = this.groupSessions(this.props.sessions);
         return (
             <div>
-                <Table celled>
+                <Table celled fixed>
                     <Table.Header>
                         <Table.Row>
-                            <Table.HeaderCell></Table.HeaderCell>
+                            <Table.HeaderCell width={1}></Table.HeaderCell>
                             {weekdays.filter(weekday => singleDayMode ? weekday.selected : true).map(weekday => (
-                                <Table.HeaderCell key={weekday.date.getDate()}>{moment(weekday.date).format('ddd D/M')}</Table.HeaderCell>
+                                <Table.HeaderCell width={2} key={weekday.date.getDate()}>{moment(weekday.date).format('ddd D/M')}</Table.HeaderCell>
                             ))}
                         </Table.Row>
                     </Table.Header>
@@ -98,17 +98,19 @@ export default class CalendarTable extends Component {
                     <Table.Body>
                         {groupedSessions && groupedSessions.length > 0 && groupedSessions.map(group => (
                             <Table.Row key={group.hours.toString() + group.minutes.toString()}>
-                                <Table.Cell textAlign="center">
-                                    {group.hours.toString().padStart(2, "0") + ':' + group.minutes.toString().padStart(2, "0")}
-                                    <br />
-                                    - {(group.hours + 1).toString().padStart(2, "0") + ':' + group.minutes.toString().padStart(2, "0")}
+                                <Table.Cell>
+                                    <div className={styles.CellTime}>
+                                        {group.hours.toString().padStart(2, "0") + ':' + group.minutes.toString().padStart(2, "0")}
+                                        <br />
+                                        - {(group.hours + 1).toString().padStart(2, "0") + ':' + group.minutes.toString().padStart(2, "0")}
+                                    </div>
                                 </Table.Cell>
                                 {
                                     weekdays.filter(weekday => singleDayMode ? weekday.selected : true).map(weekday => {
                                         const day = weekday.date.getDay();
                                         const sessions = group.sessions.filter(session => (new Date(session.date)).getDay() === day);
                                         const isHovered = !!cellEntered && day === cellEntered.day && group.hours === cellEntered.hours && group.minutes === cellEntered.minutes;
-                                        
+
                                         let card = null;
                                         let textAlign = null;
                                         let verticalAlign = null;
@@ -121,24 +123,25 @@ export default class CalendarTable extends Component {
                                                     ))}
                                                 </Fragment>
                                             )
+                                            verticalAlign = 'top'
                                         } else if (isHovered) {
-                                            card = <p>Tạo<br/>lịch học</p>
+                                            card = <p>Tạo<br />lịch học</p>
                                             textAlign = 'center'
                                             verticalAlign = 'middle'
                                         }
 
                                         return (
-                                            <Table.Cell 
-                                                verticalAlign={verticalAlign} 
-                                                textAlign={textAlign} 
-                                                key={day} 
-                                                onMouseEnter={() => this.handleMouseEnterCell({ day, hours: group.hours, minutes: group.minutes })} 
+                                            <Table.Cell
+                                                verticalAlign={verticalAlign}
+                                                textAlign={textAlign}
+                                                key={day}
+                                                onMouseEnter={() => this.handleMouseEnterCell({ day, hours: group.hours, minutes: group.minutes })}
                                                 onMouseLeave={() => this.handleMouseLeaveCell()}
-                                                onClick={() => this.openCreateModal({ 
-                                                    date: weekday.date, 
-                                                    hours: group.hours, 
-                                                    minutes: group.minutes, 
-                                                    haveSessions 
+                                                onClick={() => this.openCreateModal({
+                                                    date: weekday.date,
+                                                    hours: group.hours,
+                                                    minutes: group.minutes,
+                                                    haveSessions
                                                 })}
                                                 className={styles.TableCell}
                                             >
