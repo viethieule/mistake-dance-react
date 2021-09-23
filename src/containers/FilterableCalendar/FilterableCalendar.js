@@ -4,7 +4,7 @@ import CalendarTable from './CalendarTable/CalendarTable'
 import axios from '../../axios';
 import moment from 'moment';
 import ScheduleForm from './ScheduleForm/ScheduleForm';
-import { Loader } from 'semantic-ui-react';
+import { Container, Loader } from 'semantic-ui-react';
 import { history } from '../../';
 import { Route } from 'react-router';
 import SessionDetail from './SessionDetail/SessionDetail';
@@ -13,7 +13,6 @@ export default class FilterableCalendar extends Component {
     state = {
         weekdays: this.initWeekdays(),
         sessions: [],
-        selectedSchedule: null,
         selectedSession: null,
         singleDayMode: false,
         loading: true,
@@ -184,7 +183,7 @@ export default class FilterableCalendar extends Component {
     buildScheduleFormKey = () => {
         const { selectedSession: session, selectedDateTimeForCreate } = this.state;
         if (session) {
-            return session.id; 
+            return session.id;
         } else if (selectedDateTimeForCreate) {
             return selectedDateTimeForCreate.getTime();
         }
@@ -192,13 +191,28 @@ export default class FilterableCalendar extends Component {
         return null;
     }
 
+    handlePostDeleteSchedule = () => {
+        this.setState({ sessions: [...this.state.sessions.filter(x => x.schedule.id !== this.state.selectedSession.schedule.id)] });
+        this.handleCloseSessionDetailModal();
+    }
+
+    handlePostDeleteSession = () => {
+        this.setState({
+            sessions: [...this.state.sessions.filter(x =>
+                x.schedule.id !== this.state.selectedSession.schedule.id ||
+                (x.schedule.id === this.state.selectedSession.schedule.id && x.sessionNo < this.state.selectedSession.sessionNo)
+            )]
+        });
+        this.handleCloseSessionDetailModal();
+    }
+
     render() {
         const { weekdays, sessions, loading, openCreateSchedule, singleDayMode, selectedDateTimeForCreate, selectedSession } = this.state;
         const scheduleFormKey = this.buildScheduleFormKey();
         return (
             <div>
-                <h3>Lịch các lớp - {scheduleFormKey}</h3>
-                <div>
+                <Container>
+                    <h3>Lịch các lớp</h3>
                     <CalendarControls
                         weekdays={weekdays}
                         toggleCreateModal={this.toggleCreateModal}
@@ -213,12 +227,12 @@ export default class FilterableCalendar extends Component {
                             sessions && <CalendarTable
                                 weekdays={weekdays}
                                 singleDayMode={singleDayMode}
-                                sessions={sessions} 
+                                sessions={sessions}
                                 toggleSessionDetailModal={this.toggleSessionDetailModal}
                                 toggleCreateModal={this.toggleCreateModal}
                             />
                     }
-                </div>
+                </Container>
 
                 <ScheduleForm
                     handleOnScheduleCreated={this.handleOnScheduleCreated}
@@ -231,7 +245,14 @@ export default class FilterableCalendar extends Component {
                 />
 
                 <Route path="/sessions/:id" render={routeProps => (
-                    <SessionDetail session={selectedSession} onEdit={this.handleEditSchedule} onClose={this.handleCloseSessionDetailModal} {...routeProps} />
+                    <SessionDetail
+                        session={selectedSession}
+                        onEdit={this.handleEditSchedule}
+                        onClose={this.handleCloseSessionDetailModal}
+                        handlePostDeleteSchedule={this.handlePostDeleteSchedule}
+                        handlePostDeleteSession={this.handlePostDeleteSession}
+                        {...routeProps}
+                    />
                 )} />
             </div>
         )

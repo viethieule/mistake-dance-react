@@ -1,10 +1,13 @@
 import React, { Component, Fragment } from 'react'
-import { Button, Grid, Modal, Input, Icon, Table, Label, Loader, Dimmer } from 'semantic-ui-react'
-import { history } from '../../..';
+import { Button, Grid, Modal, Input, Icon, Table, Label, Loader, Dimmer, Dropdown } from 'semantic-ui-react'
 import moment from 'moment';
 import axios from '../../../axios'
 import { RegistrationStatus } from '../../../enums/enums';
 import { updateItem } from '../../../utils/utils';
+import DropdownItemWithConfirm from '../../../components/withConfirm/DropdownItemWithConfirm';
+
+const DELETE_SCHEDULE_CONFIRM_MESSAGE = 'Lưu ý: Toàn bộ buổi học sau buổi này sẽ bị xóa. Toàn bộ học viên của các buổi bị xóa sẽ được hoàn lại buổi học đã đăng ký. Bạn có chắc chắn muốn xóa?'
+const DELETE_SESION_CONFIRM_MESSAGE = 'Toàn bộ học viên có đăng ký các buổi thuộc lịch học này sẽ được hoàn lại buổi học sau khi xóa. Bạn có chắc chắn muốn xóa lịch học này?'
 
 export default class SessionDetail extends Component {
     state = {
@@ -145,6 +148,28 @@ export default class SessionDetail extends Component {
             })
     }
 
+    deleteSession = () => {
+        axios.delete('api/schedule/deleteSession/' + this.props.session.id)
+            .then(response => {
+                if (response && response.data && response.data.success) {
+                    console.log(response);
+                    this.props.handlePostDeleteSession();
+                }
+            })
+            .catch(err => console.log(err));
+    }
+
+    deleteSchedule = () => {
+        axios.delete('api/schedule/delete/' + this.props.session.schedule.id)
+            .then(response => {
+                if (response && response.data && response.data.success) {
+                    console.log(response);
+                    this.props.handlePostDeleteSchedule();
+                }
+            })
+            .catch(err => console.log(err));
+    }
+
     render() {
         const {
             session,
@@ -194,114 +219,122 @@ export default class SessionDetail extends Component {
         }
 
         return (
-            <Modal open={true}>
-                <Modal.Header>{schedule.className} - {date}</Modal.Header>
-                <Modal.Content>
-                    <Grid>
-                        <Grid.Column width={4}>
-                            <label>Bài múa</label>
-                            <p><b>{schedule.song}</b></p>
-                            <label>Buổi</label>
-                            <p><b>{session.sessionNo} / {schedule.sessions}</b></p>
-                            <label>Buổi / tuần</label>
-                            <p><b>{schedule.daysPerWeekString}</b></p>
-                            <label>Thời gian</label>
-                            <p><b>{date}</b></p>
-                            <label>Địa điểm</label>
-                            <p><b>{schedule.branch}</b></p>
-                            <label>Giáo viên</label>
-                            <p><b>{schedule.trainer.name}</b></p>
-                            <label>Số học viên đăng ký</label>
-                            <p><b>{registrations.length}</b></p>
-                        </Grid.Column>
-                        <Grid.Column width={12}>
-                            <Grid>
-                                <Grid.Row>
-                                    <Grid.Column width={10}>
-                                        <label>Danh sách đăng ký</label>
-                                    </Grid.Column>
-                                    <Grid.Column width={6}>
-                                        <Input
-                                            onChange={this.searchOnChange}
-                                            icon={<Icon name="search" circular link onClick={this.search} />}
-                                            placeholder="Tim kiếm..."
-                                            size="mini"
-                                            fluid={!usersFound}
-                                        />
-                                        {' '}
-                                        {!!usersFound &&
-                                            <Button disabled={loading.search} loading={loading.search} color="red" size="mini" icon onClick={this.hideSearchResults}>
-                                                <Icon name="close" />
-                                            </Button>
-                                        }
-                                    </Grid.Column>
-                                </Grid.Row>
-                                {searchResults}
-                                {
-                                    loading.sessions ?
-                                        <Grid.Row>
-                                            <Grid.Column>
-                                                <Dimmer active inverted>
-                                                    <Loader inline='centered' inverted>Loading</Loader>
-                                                </Dimmer>
-                                            </Grid.Column>
-                                        </Grid.Row> :
-                                        registrations.length > 0 ?
+            <Fragment>
+                <Modal open={true}>
+                    <Modal.Header>{schedule.className} - {date}</Modal.Header>
+                    <Modal.Content>
+                        <Grid>
+                            <Grid.Column width={4}>
+                                <label>Bài múa</label>
+                                <p><b>{schedule.song}</b></p>
+                                <label>Buổi</label>
+                                <p><b>{session.sessionNo} / {schedule.sessions}</b></p>
+                                <label>Buổi / tuần</label>
+                                <p><b>{schedule.daysPerWeekString}</b></p>
+                                <label>Thời gian</label>
+                                <p><b>{date}</b></p>
+                                <label>Địa điểm</label>
+                                <p><b>{schedule.branch}</b></p>
+                                <label>Giáo viên</label>
+                                <p><b>{schedule.trainer.name}</b></p>
+                                <label>Số học viên đăng ký</label>
+                                <p><b>{registrations.length}</b></p>
+                            </Grid.Column>
+                            <Grid.Column width={12}>
+                                <Grid>
+                                    <Grid.Row>
+                                        <Grid.Column width={10}>
+                                            <label>Danh sách đăng ký</label>
+                                        </Grid.Column>
+                                        <Grid.Column width={6}>
+                                            <Input
+                                                onChange={this.searchOnChange}
+                                                icon={<Icon name="search" circular link onClick={this.search} />}
+                                                placeholder="Tim kiếm..."
+                                                size="mini"
+                                                fluid={!usersFound}
+                                            />
+                                            {' '}
+                                            {!!usersFound &&
+                                                <Button disabled={loading.search} loading={loading.search} color="red" size="mini" icon onClick={this.hideSearchResults}>
+                                                    <Icon name="close" />
+                                                </Button>
+                                            }
+                                        </Grid.Column>
+                                    </Grid.Row>
+                                    {searchResults}
+                                    {
+                                        loading.sessions ?
                                             <Grid.Row>
                                                 <Grid.Column>
-                                                    <Table>
-                                                        <Table.Body>
-                                                            {registrations.map((registration, index) => (
-                                                                <Table.Row key={registration.id}>
-                                                                    <Table.Cell>{index + 1}</Table.Cell>
-                                                                    <Table.Cell>{registration.user.fullName}</Table.Cell>
-                                                                    <Table.Cell>
-                                                                        {
-                                                                            registration.status.value === RegistrationStatus.Registered ?
-                                                                                <Fragment>
-                                                                                    <Button
-                                                                                        loading={loading.confirmRegistration && registration.id === target.confirmRegistrationId}
-                                                                                        size="mini" 
-                                                                                        icon 
-                                                                                        onClick={() => this.confirmRegistration(registration.id)}
-                                                                                    >
-                                                                                        <Icon name="check" /> Đến lớp
-                                                                                    </Button>
-                                                                                    <Button
-                                                                                        loading={loading.cancelRegistration && registration.id === target.cancelRegistrationId} 
-                                                                                        size="mini"
-                                                                                        icon
-                                                                                        onClick={() => this.cancelRegistration(registration.id)}
-                                                                                    >
-                                                                                        <Icon name="close" /> Hủy
-                                                                                    </Button>
-                                                                                </Fragment> :
-                                                                                <Label>
-                                                                                    <Icon name="check" /> {registration.status.name}
-                                                                                </Label>
-                                                                        }
-                                                                    </Table.Cell>
-                                                                </Table.Row>
-                                                            ))}
-                                                        </Table.Body>
-                                                    </Table>
+                                                    <Dimmer active inverted>
+                                                        <Loader inline='centered' inverted>Loading</Loader>
+                                                    </Dimmer>
                                                 </Grid.Column>
                                             </Grid.Row> :
-                                            null
-                                }
-                            </Grid>
-                        </Grid.Column>
-                    </Grid>
-                </Modal.Content>
-                <Modal.Actions>
-                    <Button color="blue" onClick={onEdit}>
-                        Sửa
-                    </Button>
-                    <Button color='black' onClick={onClose}>
-                        Đóng
-                    </Button>
-                </Modal.Actions>
-            </Modal>
+                                            registrations.length > 0 ?
+                                                <Grid.Row>
+                                                    <Grid.Column>
+                                                        <Table>
+                                                            <Table.Body>
+                                                                {registrations.map((registration, index) => (
+                                                                    <Table.Row key={registration.id}>
+                                                                        <Table.Cell>{index + 1}</Table.Cell>
+                                                                        <Table.Cell>{registration.user.fullName}</Table.Cell>
+                                                                        <Table.Cell>
+                                                                            {
+                                                                                registration.status.value === RegistrationStatus.Registered ?
+                                                                                    <Fragment>
+                                                                                        <Button
+                                                                                            loading={loading.confirmRegistration && registration.id === target.confirmRegistrationId}
+                                                                                            size="mini"
+                                                                                            icon
+                                                                                            onClick={() => this.confirmRegistration(registration.id)}
+                                                                                        >
+                                                                                            <Icon name="check" /> Đến lớp
+                                                                                        </Button>
+                                                                                        <Button
+                                                                                            loading={loading.cancelRegistration && registration.id === target.cancelRegistrationId}
+                                                                                            size="mini"
+                                                                                            icon
+                                                                                            onClick={() => this.cancelRegistration(registration.id)}
+                                                                                        >
+                                                                                            <Icon name="close" /> Hủy
+                                                                                        </Button>
+                                                                                    </Fragment> :
+                                                                                    <Label>
+                                                                                        <Icon name="check" /> {registration.status.name}
+                                                                                    </Label>
+                                                                            }
+                                                                        </Table.Cell>
+                                                                    </Table.Row>
+                                                                ))}
+                                                            </Table.Body>
+                                                        </Table>
+                                                    </Grid.Column>
+                                                </Grid.Row> :
+                                                null
+                                    }
+                                </Grid>
+                            </Grid.Column>
+                        </Grid>
+                    </Modal.Content>
+                    <Modal.Actions>
+                        <Dropdown button upward text="Xóa">
+                            <Dropdown.Menu>
+                                <DropdownItemWithConfirm text="Xóa buổi học này" content={DELETE_SESION_CONFIRM_MESSAGE} onConfirm={this.deleteSession} />
+                                <DropdownItemWithConfirm text="Xóa toàn bộ lịch học" content={DELETE_SCHEDULE_CONFIRM_MESSAGE} onConfirm={this.deleteSchedule} />
+                            </Dropdown.Menu>
+                        </Dropdown>
+                        <Button color="blue" onClick={onEdit}>
+                            Sửa
+                        </Button>
+                        <Button color='black' onClick={onClose}>
+                            Đóng
+                        </Button>
+                    </Modal.Actions>
+                </Modal>
+            </Fragment>
         )
     }
 }

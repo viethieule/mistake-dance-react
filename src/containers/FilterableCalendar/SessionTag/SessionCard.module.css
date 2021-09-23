@@ -1,0 +1,28 @@
+.SessionCard {
+    padding: 16px;
+    /* color: white; */
+    border-radius: 10px;
+    border: 2px solid;
+}
+
+.SessionCardRed {
+    border-color: #FF4171;
+}
+
+.SessionCardGreen {
+    border-color: #49B583;
+}
+
+.SessionCardYellow {
+    border-color: #FFBD69;
+}
+
+.ClassName {
+    font-size: 1.1em;
+    margin-bottom: 0.2em;
+    font-weight: bold;
+}
+
+.Song {
+    margin-bottom: 0.4em
+}

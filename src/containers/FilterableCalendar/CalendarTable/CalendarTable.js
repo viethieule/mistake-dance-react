@@ -98,8 +98,10 @@ export default class CalendarTable extends Component {
                     <Table.Body>
                         {groupedSessions && groupedSessions.length > 0 && groupedSessions.map(group => (
                             <Table.Row key={group.hours.toString() + group.minutes.toString()}>
-                                <Table.Cell>
-                                    {group.hours.toString() + ':' + group.minutes.toString()} - {(group.hours + 1).toString() + ':' + group.minutes.toString()}
+                                <Table.Cell textAlign="center">
+                                    {group.hours.toString().padStart(2, "0") + ':' + group.minutes.toString().padStart(2, "0")}
+                                    <br />
+                                    - {(group.hours + 1).toString().padStart(2, "0") + ':' + group.minutes.toString().padStart(2, "0")}
                                 </Table.Cell>
                                 {
                                     weekdays.filter(weekday => singleDayMode ? weekday.selected : true).map(weekday => {

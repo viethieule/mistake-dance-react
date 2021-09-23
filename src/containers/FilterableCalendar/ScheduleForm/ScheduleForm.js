@@ -14,10 +14,10 @@ export default class ScheduleForm extends Component {
         super(props);
 
         if (props.session) {
-            const { schedule, id } = props.session;
+            const { schedule } = props.session;
             this.state = {
-                session: {
-                    id,
+                schedule: {
+                    id: schedule.id,
                     className: schedule.classId.toString(),
                     song: schedule.song,
                     openingDate: new Date(schedule.openingDate),
@@ -35,7 +35,7 @@ export default class ScheduleForm extends Component {
             const openingDate = selectedDatetime ? selectedDatetime : new Date();
 
             this.state = {
-                session: {
+                schedule: {
                     id: '',
                     className: '',
                     song: '',
@@ -68,8 +68,8 @@ export default class ScheduleForm extends Component {
         }
 
         const { session } = this.props;
-        if (session.id) {
-            axios.post('api/schedule/update', { schedule: { ...schedule, id: session.schedule.id }, selectedScheduleDetailId: session.id })
+        if (session) {
+            axios.post('api/schedule/update', { schedule, selectedScheduleDetailId: session.id })
                 .then(response => {
                     console.log(response);
                 })
@@ -87,15 +87,15 @@ export default class ScheduleForm extends Component {
     }
 
     render() {
-        const { session } = this.state;
+        const { schedule } = this.state;
         const { open, onClose } = this.props;
         return (
             <Modal
                 open={open}
             >
-                <Modal.Header>{session.id ? 'Sửa' : 'Tạo'} lịch học</Modal.Header>
+                <Modal.Header>{schedule.id ? 'Sửa' : 'Tạo'} lịch học</Modal.Header>
                 <FinalForm
-                    initialValues={session}
+                    initialValues={schedule}
                     onSubmit={this.handleFormSubmit}
                     render={({ handleSubmit }) => (
                         <Fragment>
@@ -106,7 +106,7 @@ export default class ScheduleForm extends Component {
                                             name="className"
                                             label="Lớp"
                                             width={6}
-                                            value={session.className}
+                                            value={schedule.className}
                                             options={'api/class/dropdown'}
                                             component={SelectInput}
                                         />
@@ -114,7 +114,7 @@ export default class ScheduleForm extends Component {
                                             name="song"
                                             label="Bài múa"
                                             width={8}
-                                            value={session.song}
+                                            value={schedule.song}
                                             component={TextInput}
                                         />
                                     </Form.Group>
@@ -123,7 +123,7 @@ export default class ScheduleForm extends Component {
                                             name="openingDate"
                                             label="Ngày bắt đầu"
                                             width={6}
-                                            value={session.openingDate}
+                                            value={schedule.openingDate}
                                             component={DateInput}
                                             date={1}
                                             time={0}
@@ -132,7 +132,7 @@ export default class ScheduleForm extends Component {
                                             name="startTime"
                                             label="Giờ"
                                             width={6}
-                                            value={session.startTime}
+                                            value={schedule.startTime}
                                             component={TimeInput}
                                         />
                                     </Form.Group>
@@ -154,7 +154,7 @@ export default class ScheduleForm extends Component {
                                             name="sessions"
                                             label="Tổng số buổi"
                                             width={2}
-                                            value={session.sessions}
+                                            value={schedule.sessions}
                                             component={TextInput}
                                         />
                                     </Form.Group>
@@ -163,7 +163,7 @@ export default class ScheduleForm extends Component {
                                             name="trainer"
                                             label="Giáo viên"
                                             width={6}
-                                            value={session.trainer}
+                                            value={schedule.trainer}
                                             options={'api/trainer/dropdown'}
                                             component={SelectInput}
                                         />
@@ -171,7 +171,7 @@ export default class ScheduleForm extends Component {
                                             name="branch"
                                             label="Chi nhánh"
                                             width={3}
-                                            value={session.branch}
+                                            value={schedule.branch}
                                             options={'api/branch/dropdown'}
                                             component={SelectInput}
                                         />

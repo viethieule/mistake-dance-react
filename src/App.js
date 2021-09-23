@@ -4,7 +4,6 @@ import Layout from './containers/Layout/Layout';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import FilterableCalendar from './containers/FilterableCalendar/FilterableCalendar';
 import LoginForm from './containers/LoginForm/LoginForm';
-import SessionDetail from './containers/FilterableCalendar/SessionDetail/SessionDetail';
 
 function App() {
   return (
