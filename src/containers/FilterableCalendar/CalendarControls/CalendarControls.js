@@ -26,8 +26,8 @@ export default class CalendarControls extends Component {
         } = this.props;
         return (
             <Grid>
-                <div className="sixteen column row">
-                    <div className="eight wide column">
+                <Grid.Row className={styles.CalendarControls}>
+                    <Grid.Column width={12}>
                         <button onClick={this.navigatePreviousWeek}>&lt;</button>
                         {weekdays.map((weekday, dayIndex) => {
                             const btnStyle = singleDayMode && weekday.selected ? styles.Circle : styles.CircleInactive;
@@ -36,14 +36,15 @@ export default class CalendarControls extends Component {
                             )
                         })}
                         <button onClick={this.navigateNextWeek}>&gt;</button>
-                    </div>
-                    <div className="two wide column"><p>{this.formatDDMM(weekdays[0].date)} - {this.formatDDMM(weekdays[weekdays.length - 1].date)}</p></div>
-                    <div className="four wide column"></div>
-                    <div className="two wide column">
-                        <Button onClick={toggleViewMode}>{singleDayMode ? "Lịch tuần" : "Lịch ngày"}</Button>
-                        <Button onClick={() => toggleCreateModal()}>Tạo lịch học</Button>
-                    </div>
-                </div>
+                        <p className={styles.Weekdays}>{this.formatDDMM(weekdays[0].date)} - {this.formatDDMM(weekdays[weekdays.length - 1].date)}</p>
+                    </Grid.Column>
+                    <Grid.Column width={4}>
+                        <div class={styles.Buttons}>
+                            <Button onClick={toggleViewMode}>{singleDayMode ? "Lịch tuần" : "Lịch ngày"}</Button>
+                            <Button onClick={() => toggleCreateModal()}>Tạo lịch học</Button>
+                        </div>
+                    </Grid.Column>
+                </Grid.Row>
             </Grid>
         )
     }

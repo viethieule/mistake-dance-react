@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react'
-import { Button, Form, Modal } from 'semantic-ui-react'
+import { Button, Form, Modal, TransitionablePortal } from 'semantic-ui-react'
 import { Form as FinalForm, Field } from 'react-final-form'
 import SelectInput from '../../../components/form/SelectInput';
 import TextInput from '../../../components/form/TextInput';
@@ -90,111 +90,113 @@ export default class ScheduleForm extends Component {
         const { schedule } = this.state;
         const { open, onClose } = this.props;
         return (
-            <Modal
-                open={open}
-            >
-                <Modal.Header>{schedule.id ? 'Sửa' : 'Tạo'} lịch học</Modal.Header>
-                <FinalForm
-                    initialValues={schedule}
-                    onSubmit={this.handleFormSubmit}
-                    render={({ handleSubmit }) => (
-                        <Fragment>
-                            <Modal.Content>
-                                <Form>
-                                    <Form.Group>
-                                        <Field
-                                            name="className"
-                                            label="Lớp"
-                                            width={6}
-                                            value={schedule.className}
-                                            options={'api/class/dropdown'}
-                                            component={SelectInput}
-                                        />
-                                        <Field
-                                            name="song"
-                                            label="Bài múa"
-                                            width={8}
-                                            value={schedule.song}
-                                            component={TextInput}
-                                        />
-                                    </Form.Group>
-                                    <Form.Group>
-                                        <Field
-                                            name="openingDate"
-                                            label="Ngày bắt đầu"
-                                            width={6}
-                                            value={schedule.openingDate}
-                                            component={DateInput}
-                                            date={1}
-                                            time={0}
-                                        />
-                                        <Field
-                                            name="startTime"
-                                            label="Giờ"
-                                            width={6}
-                                            value={schedule.startTime}
-                                            component={TimeInput}
-                                        />
-                                    </Form.Group>
-                                    <Form.Group>
-                                        {
-                                            [...Array(7).keys()].map(key => (
-                                                <Field
-                                                    key={key}
-                                                    name={"weekdays"}
-                                                    label={this.getLocalizedDay(key)}
-                                                    width={2}
-                                                    value={key}
-                                                    type="checkbox"
-                                                    component={CheckboxInput}
-                                                />
-                                            ))
-                                        }
-                                        <Field
-                                            name="sessions"
-                                            label="Tổng số buổi"
-                                            width={2}
-                                            value={schedule.sessions}
-                                            component={TextInput}
-                                        />
-                                    </Form.Group>
-                                    <Form.Group>
-                                        <Field
-                                            name="trainer"
-                                            label="Giáo viên"
-                                            width={6}
-                                            value={schedule.trainer}
-                                            options={'api/trainer/dropdown'}
-                                            component={SelectInput}
-                                        />
-                                        <Field
-                                            name="branch"
-                                            label="Chi nhánh"
-                                            width={3}
-                                            value={schedule.branch}
-                                            options={'api/branch/dropdown'}
-                                            component={SelectInput}
-                                        />
-                                    </Form.Group>
-                                </Form>
-                            </Modal.Content>
-                            <Modal.Actions>
-                                <Button color="black" onClick={onClose}>
-                                    Cancel
-                                </Button>
-                                <Button
-                                    content="Done"
-                                    type="submit"
-                                    labelPosition="right"
-                                    icon="checkmark"
-                                    onClick={handleSubmit}
-                                    positive
-                                />
-                            </Modal.Actions>
-                        </Fragment>
-                    )}
-                />
-            </Modal>
+            <TransitionablePortal open={open} transition={{ animation: 'fade', duration: 300 }}>
+                <Modal
+                    open={open}
+                >
+                    <Modal.Header>{schedule.id ? 'Sửa' : 'Tạo'} lịch học</Modal.Header>
+                    <FinalForm
+                        initialValues={schedule}
+                        onSubmit={this.handleFormSubmit}
+                        render={({ handleSubmit }) => (
+                            <Fragment>
+                                <Modal.Content>
+                                    <Form>
+                                        <Form.Group>
+                                            <Field
+                                                name="className"
+                                                label="Lớp"
+                                                width={6}
+                                                value={schedule.className}
+                                                options={'api/class/dropdown'}
+                                                component={SelectInput}
+                                            />
+                                            <Field
+                                                name="song"
+                                                label="Bài múa"
+                                                width={8}
+                                                value={schedule.song}
+                                                component={TextInput}
+                                            />
+                                        </Form.Group>
+                                        <Form.Group>
+                                            <Field
+                                                name="openingDate"
+                                                label="Ngày bắt đầu"
+                                                width={6}
+                                                value={schedule.openingDate}
+                                                component={DateInput}
+                                                date={1}
+                                                time={0}
+                                            />
+                                            <Field
+                                                name="startTime"
+                                                label="Giờ"
+                                                width={6}
+                                                value={schedule.startTime}
+                                                component={TimeInput}
+                                            />
+                                        </Form.Group>
+                                        <Form.Group>
+                                            {
+                                                [...Array(7).keys()].map(key => (
+                                                    <Field
+                                                        key={key}
+                                                        name={"weekdays"}
+                                                        label={this.getLocalizedDay(key)}
+                                                        width={2}
+                                                        value={key}
+                                                        type="checkbox"
+                                                        component={CheckboxInput}
+                                                    />
+                                                ))
+                                            }
+                                            <Field
+                                                name="sessions"
+                                                label="Tổng số buổi"
+                                                width={2}
+                                                value={schedule.sessions}
+                                                component={TextInput}
+                                            />
+                                        </Form.Group>
+                                        <Form.Group>
+                                            <Field
+                                                name="trainer"
+                                                label="Giáo viên"
+                                                width={6}
+                                                value={schedule.trainer}
+                                                options={'api/trainer/dropdown'}
+                                                component={SelectInput}
+                                            />
+                                            <Field
+                                                name="branch"
+                                                label="Chi nhánh"
+                                                width={3}
+                                                value={schedule.branch}
+                                                options={'api/branch/dropdown'}
+                                                component={SelectInput}
+                                            />
+                                        </Form.Group>
+                                    </Form>
+                                </Modal.Content>
+                                <Modal.Actions>
+                                    <Button color="black" onClick={onClose}>
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        content="Done"
+                                        type="submit"
+                                        labelPosition="right"
+                                        icon="checkmark"
+                                        onClick={handleSubmit}
+                                        positive
+                                    />
+                                </Modal.Actions>
+                            </Fragment>
+                        )}
+                    />
+                </Modal>
+            </TransitionablePortal>
         )
     }
 }

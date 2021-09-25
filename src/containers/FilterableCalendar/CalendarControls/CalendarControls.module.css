@@ -1,3 +1,7 @@
+.CalendarControls {
+    margin-bottom: 17px;
+}
+
 .Circle {
     border-radius: 50%;
     padding: 10px;
@@ -13,4 +17,14 @@
 
 .CircleInactive:hover {
     cursor: pointer;
+}
+
+.Weekdays {
+    display: inline-block;
+    margin-left: 10px;
+    font-size: 17px;
+}
+
+.Buttons {
+    float: right;
 }
