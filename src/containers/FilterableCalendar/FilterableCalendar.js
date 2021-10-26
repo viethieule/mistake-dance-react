@@ -43,11 +43,12 @@ export default class FilterableCalendar extends Component {
 
     fetchSchedules() {
         const start = this.state.weekdays[0].date.toISOString();
-        axios.post('api/schedule/getdetail', { start })
+        const end = this.state.weekdays[6].date.toISOString();
+        axios.get(`api/schedules/sessions/?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`)
             .then(response => {
                 console.log(response);
-                if (response && response.data && response.data.scheduleDetails) {
-                    const sessions = response.data.scheduleDetails;
+                if (response && response.data) {
+                    const sessions = response.data;
                     this.setState({ sessions, loading: false })
                 }
             })

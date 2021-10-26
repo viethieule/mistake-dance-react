@@ -8,9 +8,9 @@ import { history } from '../..';
 export default class LoginForm extends Component {
     handleSubmit = (values) => {
         console.log(values);
-        axios.post('api/account/login', values)
+        axios.post('api/auth/login', values)
             .then(response => {
-                if (response && response.data && response.data.success) {
+                if (response && response.data && response.data.token) {
                     let returnUrl = '/';
                     if (this.props.location && this.props.location.returnUrl) {
                         returnUrl = this.props.location.returnUrl;

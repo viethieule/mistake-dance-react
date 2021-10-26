@@ -2,7 +2,7 @@ import axios from 'axios';
 import { history } from '.';
 
 const instance = axios.create({
-    baseURL: 'http://localhost/DanceClass/'
+    baseURL: 'https://localhost:44334/'
 });
 
 instance.interceptors.request.use(config => {

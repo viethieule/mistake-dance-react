@@ -39,7 +39,7 @@ export default class CalendarControls extends Component {
                         <p className={styles.Weekdays}>{this.formatDDMM(weekdays[0].date)} - {this.formatDDMM(weekdays[weekdays.length - 1].date)}</p>
                     </Grid.Column>
                     <Grid.Column width={4}>
-                        <div class={styles.Buttons}>
+                        <div className={styles.Buttons}>
                             <Button onClick={toggleViewMode}>{singleDayMode ? "Lịch tuần" : "Lịch ngày"}</Button>
                             <Button onClick={() => toggleCreateModal()}>Tạo lịch học</Button>
                         </div>

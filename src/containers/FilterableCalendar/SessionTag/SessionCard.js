@@ -23,7 +23,7 @@ export default class SessionCard extends Component {
                 <p className={styles.ClassName}>{session.schedule.className}</p>
                 <p className={styles.Song}>{session.schedule.song}</p>
                 {/* <br /> */}
-                <p className={styles.Info}>{session.sessionNo}/{session.schedule.sessions} - {session.totalRegistered}/20 - {session.schedule.branch}</p>
+                <p className={styles.Info}>{session.number}/{session.schedule.totalSessions} - {session.totalRegistered}/20 - {session.schedule.branch.name}</p>
             </div>
         )
     }
