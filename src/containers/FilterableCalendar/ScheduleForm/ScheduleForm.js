@@ -98,6 +98,10 @@ export default class ScheduleForm extends Component {
                     <FinalForm
                         initialValues={schedule}
                         onSubmit={this.handleFormSubmit}
+                        subscription={{
+                            submitting: true,
+                            pristine: true,
+                        }}
                         render={({ handleSubmit }) => (
                             <Fragment>
                                 <Modal.Content>
@@ -110,6 +114,11 @@ export default class ScheduleForm extends Component {
                                                 value={schedule.className}
                                                 options={'api/class/dropdown'}
                                                 component={SelectInput}
+                                                subscription={{
+                                                    touched: true,
+                                                    error: true,
+                                                    value: true,
+                                                }}
                                             />
                                             <Field
                                                 name="song"
@@ -117,6 +126,11 @@ export default class ScheduleForm extends Component {
                                                 width={8}
                                                 value={schedule.song}
                                                 component={TextInput}
+                                                subscription={{
+                                                    touched: true,
+                                                    error: true,
+                                                    value: true,
+                                                }}
                                             />
                                         </Form.Group>
                                         <Form.Group>
@@ -128,6 +142,11 @@ export default class ScheduleForm extends Component {
                                                 component={DateInput}
                                                 date={1}
                                                 time={0}
+                                                subscription={{
+                                                    touched: true,
+                                                    error: true,
+                                                    value: true,
+                                                }}
                                             />
                                             <Field
                                                 name="startTime"
@@ -135,6 +154,11 @@ export default class ScheduleForm extends Component {
                                                 width={6}
                                                 value={schedule.startTime}
                                                 component={TimeInput}
+                                                subscription={{
+                                                    touched: true,
+                                                    error: true,
+                                                    value: true,
+                                                }}
                                             />
                                         </Form.Group>
                                         <Form.Group>
@@ -148,6 +172,11 @@ export default class ScheduleForm extends Component {
                                                         value={key}
                                                         type="checkbox"
                                                         component={CheckboxInput}
+                                                        subscription={{
+                                                            touched: true,
+                                                            error: true,
+                                                            value: true,
+                                                        }}
                                                     />
                                                 ))
                                             }
@@ -157,6 +186,11 @@ export default class ScheduleForm extends Component {
                                                 width={2}
                                                 value={schedule.sessions}
                                                 component={TextInput}
+                                                subscription={{
+                                                    touched: true,
+                                                    error: true,
+                                                    value: true,
+                                                }}
                                             />
                                         </Form.Group>
                                         <Form.Group>
@@ -167,6 +201,11 @@ export default class ScheduleForm extends Component {
                                                 value={schedule.trainer}
                                                 options={'api/trainer/dropdown'}
                                                 component={SelectInput}
+                                                subscription={{
+                                                    touched: true,
+                                                    error: true,
+                                                    value: true,
+                                                }}
                                             />
                                             <Field
                                                 name="branch"
@@ -175,6 +214,11 @@ export default class ScheduleForm extends Component {
                                                 value={schedule.branch}
                                                 options={'api/branch/dropdown'}
                                                 component={SelectInput}
+                                                subscription={{
+                                                    touched: true,
+                                                    error: true,
+                                                    value: true,
+                                                }}
                                             />
                                         </Form.Group>
                                     </Form>

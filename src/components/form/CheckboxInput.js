@@ -1,5 +1,6 @@
 import React from 'react'
 import { Checkbox, Form } from 'semantic-ui-react'
+import RenderCount from '../debug/RenderCount';
 
 const CheckboxInput = (props) => {
     const {
@@ -9,6 +10,7 @@ const CheckboxInput = (props) => {
     } = props;
     return (
         <Form.Field width={props.width}>
+            <RenderCount />
             <Checkbox
                 {...input}
                 {...rest}
