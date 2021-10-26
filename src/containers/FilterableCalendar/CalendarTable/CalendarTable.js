@@ -1,8 +1,9 @@
-import React, { Component, Fragment } from 'react'
+import React, { Component, Fragment, memo } from 'react'
 import { Table } from 'semantic-ui-react'
 import SessionCard from '../SessionTag/SessionCard'
 import moment from 'moment'
 import styles from './CalendarTable.module.css'
+import HoverableTableCell from './HoverableTableCell'
 
 const DEFAULT_TIME_SLOTS = [
     { hours: 9, minutes: 0 },
@@ -17,12 +18,7 @@ const DEFAULT_TIME_SLOTS = [
     { hours: 20, minutes: 0 },
 ]
 
-export default class CalendarTable extends Component {
-    state = {
-        cellEntered: {
-            day: null, hours: null, minutes: null
-        }
-    }
+class CalendarTable extends Component {
     timeSlotComparer(t1, t2) {
         const { hours: h1, minutes: m1 } = t1;
         const { hours: h2, minutes: m2 } = t2;
@@ -53,19 +49,7 @@ export default class CalendarTable extends Component {
         return groupedSessions;
     }
 
-    handleMouseEnterCell = (cellDatetimeData) => {
-        this.setState({ cellEntered: cellDatetimeData })
-    }
-
-    handleMouseLeaveCell = () => {
-        this.setState({ cellEntered: {} })
-    }
-
-    openCreateModal = ({ date, hours, minutes, haveSessions }) => {
-        if (haveSessions) {
-            return;
-        }
-
+    openCreateModal = ({ date, hours, minutes }) => {
         date = new Date(date.getTime());
         date.setHours(hours);
         date.setMinutes(minutes);
@@ -79,8 +63,6 @@ export default class CalendarTable extends Component {
             singleDayMode,
             toggleSessionDetailModal
         } = this.props;
-
-        const { cellEntered } = this.state;
 
         const groupedSessions = this.groupSessions(this.props.sessions);
         return (
@@ -108,44 +90,38 @@ export default class CalendarTable extends Component {
                                 {
                                     weekdays.filter(weekday => singleDayMode ? weekday.selected : true).map(weekday => {
                                         const day = weekday.date.getDay();
-                                        const sessions = group.sessions.filter(session => (new Date(session.date)).getDay() === day);
-                                        const isHovered = !!cellEntered && day === cellEntered.day && group.hours === cellEntered.hours && group.minutes === cellEntered.minutes;
 
-                                        let card = null;
-                                        let textAlign = null;
-                                        let verticalAlign = null;
+                                        const sessions = group.sessions.filter(session => (new Date(session.date)).getDay() === day);
                                         const haveSessions = !!sessions && sessions.length
-                                        if (haveSessions) {
-                                            card = (
+                                        if (!haveSessions) {
+                                            return (
+                                                <HoverableTableCell
+                                                    key={day}
+                                                    day={day}
+                                                    hours={group.hours}
+                                                    minutes={group.minutes}
+                                                    onClick={() => this.openCreateModal({
+                                                        date: weekday.date,
+                                                        hours: group.hours,
+                                                        minutes: group.minutes
+                                                    })}
+                                                >
+                                                    <p>Tạo<br />lịch học</p>
+                                                </HoverableTableCell>
+                                            )
+                                        }
+
+                                        return (
+                                            <Table.Cell
+                                                verticalAlign="top"
+                                                key={day}
+                                                className={styles.TableCell}
+                                            >
                                                 <Fragment>
                                                     {sessions.map(session => (
                                                         <SessionCard key={session.id} session={session} toggleSessionDetailModal={() => toggleSessionDetailModal(session)} />
                                                     ))}
                                                 </Fragment>
-                                            )
-                                            verticalAlign = 'top'
-                                        } else if (isHovered) {
-                                            card = <p>Tạo<br />lịch học</p>
-                                            textAlign = 'center'
-                                            verticalAlign = 'middle'
-                                        }
-
-                                        return (
-                                            <Table.Cell
-                                                verticalAlign={verticalAlign}
-                                                textAlign={textAlign}
-                                                key={day}
-                                                onMouseEnter={() => this.handleMouseEnterCell({ day, hours: group.hours, minutes: group.minutes })}
-                                                onMouseLeave={() => this.handleMouseLeaveCell()}
-                                                onClick={() => this.openCreateModal({
-                                                    date: weekday.date,
-                                                    hours: group.hours,
-                                                    minutes: group.minutes,
-                                                    haveSessions
-                                                })}
-                                                className={styles.TableCell}
-                                            >
-                                                {card}
                                             </Table.Cell>
                                         )
                                     })
@@ -158,3 +134,5 @@ export default class CalendarTable extends Component {
         )
     }
 }
+
+export default memo(CalendarTable)

@@ -1,6 +1,7 @@
 import React from 'react'
 import { Form } from 'semantic-ui-react'
 import { DateTimePicker } from 'react-widgets'
+import RenderCount from '../debug/RenderCount'
 
 const DateInput = ({
     input,
@@ -11,6 +12,7 @@ const DateInput = ({
 }) => {
     return (
         <Form.Field width={width}>
+            <RenderCount />
             <label>{label}</label>
             <DateTimePicker
                 value={input.value || null}

@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
-import { Button, Grid } from 'semantic-ui-react'
+import { Button, Grid, Icon } from 'semantic-ui-react'
 import styles from './CalendarControls.module.css'
 import moment from 'moment'
 
-export default class CalendarControls extends Component {
+class CalendarControls extends Component {
     formatDDMM = (date) => {
         return moment(date).format('DD/MM')
     }
@@ -41,7 +41,7 @@ export default class CalendarControls extends Component {
                     <Grid.Column width={4}>
                         <div class={styles.Buttons}>
                             <Button onClick={toggleViewMode}>{singleDayMode ? "Lịch tuần" : "Lịch ngày"}</Button>
-                            <Button onClick={() => toggleCreateModal()}>Tạo lịch học</Button>
+                            <Button icon color="green" labelPosition='left' onClick={() => toggleCreateModal()}><Icon name="add" />Tạo lịch học</Button>
                         </div>
                     </Grid.Column>
                 </Grid.Row>
@@ -49,3 +49,5 @@ export default class CalendarControls extends Component {
         )
     }
 }
+
+export default React.memo(CalendarControls)

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Form, Select } from 'semantic-ui-react'
 import axios from '../../axios'
+import RenderCount from '../debug/RenderCount';
 
 const SelectInput = ({
     input,
@@ -33,6 +34,7 @@ const SelectInput = ({
 
     return (
         <Form.Field width={width}>
+            <RenderCount />
             <label>{label}</label>
             <Select
                 value={input.value}
