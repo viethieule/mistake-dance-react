@@ -6,11 +6,19 @@ import App from './App';
 import { Router } from 'react-router-dom';
 import reportWebVitals from './reportWebVitals';
 import { createBrowserHistory } from 'history';
+import { applyMiddleware, compose, createStore } from 'redux';
+import sessionReducer from './store/reducers/session'
+import thunk from 'redux-thunk';
+import { Provider } from 'react-redux';
 
 export const history = createBrowserHistory();
 
-const backup = console.error;
+const composeEnhancers = (typeof window !== 'undefined' && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__) || compose;
+const store = createStore(sessionReducer, composeEnhancers(
+  applyMiddleware(thunk)
+))
 
+const backup = console.error;
 console.error = function filterWarnings(...msg) {
   const supressedWarnings = ['findDOMNode'];
 
@@ -21,9 +29,11 @@ console.error = function filterWarnings(...msg) {
 
 ReactDOM.render(
   <React.StrictMode>
-    <Router history={history}>
-      <App />
-    </Router>
+    <Provider store={store}>
+      <Router history={history}>
+        <App />
+      </Router>
+    </Provider>
   </React.StrictMode>,
   document.getElementById('root')
 );

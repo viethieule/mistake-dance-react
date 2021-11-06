@@ -9,8 +9,9 @@ import { history } from '../../';
 import { Route } from 'react-router';
 import SessionDetail from './SessionDetail/SessionDetail';
 import styles from './FilterableCalendar.module.css'
+import { connect } from 'react-redux';
 
-export default class FilterableCalendar extends Component {
+class FilterableCalendar extends Component {
     state = {
         weekdays: this.initWeekdays(),
         sessions: [],
@@ -39,6 +40,7 @@ export default class FilterableCalendar extends Component {
 
     componentDidMount() {
         this.fetchSchedules();
+        this.props.initSessions(this.state.weekdays[0].date.toISOString());
     }
 
     fetchSchedules() {
@@ -72,7 +74,7 @@ export default class FilterableCalendar extends Component {
     }
 
     toggleSessionDetailModal = (session) => {
-        this.setState({ selectedSession: session });
+        // this.setState({ selectedSession: session });
         history.push('/sessions/' + session.id);
     }
 
@@ -213,7 +215,7 @@ export default class FilterableCalendar extends Component {
         return (
             <div>
                 <Container className={styles.Container}>
-                    <h3>Lịch các lớp</h3>
+                    <h3>Lịch các lớp - {!this.props.loading && this.props.sessions ? this.props.sessions.length : 'loading...'}</h3>
                     <CalendarControls
                         weekdays={weekdays}
                         toggleCreateModal={this.toggleCreateModal}
@@ -228,7 +230,6 @@ export default class FilterableCalendar extends Component {
                             sessions && <CalendarTable
                                 weekdays={weekdays}
                                 singleDayMode={singleDayMode}
-                                sessions={sessions}
                                 toggleSessionDetailModal={this.toggleSessionDetailModal}
                                 toggleCreateModal={this.toggleCreateModal}
                             />
@@ -247,7 +248,7 @@ export default class FilterableCalendar extends Component {
 
                 <Route path="/sessions/:id" render={routeProps => (
                     <SessionDetail
-                        session={selectedSession}
+                        // session={selectedSession}
                         onEdit={this.handleEditSchedule}
                         onClose={this.handleCloseSessionDetailModal}
                         handlePostDeleteSchedule={this.handlePostDeleteSchedule}
@@ -259,3 +260,30 @@ export default class FilterableCalendar extends Component {
         )
     }
 }
+
+const mapStateToProps = state => ({
+    sessions: state.sessions,
+    loading: state.loading,
+    selectedSession: state.selectedSession
+});
+
+const mapDispatchToProps = dispatch => ({
+    initSessions: (start) => dispatch(dp => {
+        dp({ type: 'FETCH_SESSIONS_START' });
+        axios.post('api/schedule/getdetail', { start })
+            .then(response => {
+                console.log(response);
+                if (response && response.data && response.data.scheduleDetails) {
+                    dp({ type: 'FETCH_SESSIONS_SUCCESS', sessions: response.data.scheduleDetails });
+                } else {
+                    dp({ type: 'FETCH_SESSIONS_FAILED' });
+                }
+            })
+            .catch(error => {
+                console.log(error);
+                dp({ type: 'FETCH_SESSIONS_FAILED' });
+            })
+    })
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(FilterableCalendar);

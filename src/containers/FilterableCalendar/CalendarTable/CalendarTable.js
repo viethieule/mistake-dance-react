@@ -4,6 +4,7 @@ import SessionCard from '../SessionTag/SessionCard'
 import moment from 'moment'
 import styles from './CalendarTable.module.css'
 import HoverableTableCell from './HoverableTableCell'
+import { connect } from 'react-redux'
 
 const DEFAULT_TIME_SLOTS = [
     { hours: 9, minutes: 0 },
@@ -61,10 +62,11 @@ class CalendarTable extends Component {
         const {
             weekdays,
             singleDayMode,
-            toggleSessionDetailModal
+            toggleSessionDetailModal,
+            sessions
         } = this.props;
 
-        const groupedSessions = this.groupSessions(this.props.sessions);
+        const groupedSessions = this.groupSessions(sessions);
         return (
             <div>
                 <Table celled fixed>
@@ -135,4 +137,8 @@ class CalendarTable extends Component {
     }
 }
 
-export default memo(CalendarTable)
+const mapStateToProps = state => ({
+    sessions: state.sessions
+})
+
+export default memo(connect(mapStateToProps)(CalendarTable))
